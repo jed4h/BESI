@@ -8,6 +8,7 @@ import struct, time
 
 # # Set the socket parameters 
 def getDateTime():
+    print "starting getDateTime()"
     host = "pool.ntp.org"
     port = 123
     buf = 1024
@@ -30,5 +31,5 @@ def getDateTime():
     t -= TIME1970
     #print t
     
-    
+    print "Conpleted getDateTime()"
     return time.ctime(t)

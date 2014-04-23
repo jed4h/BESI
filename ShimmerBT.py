@@ -25,14 +25,15 @@ def shimmer_connect(socket, addr, port):
         #attemp to connect to shimmer    
         try:
             socket.connect((addr, port))
+	    print "successfully Connected"
             toggleLED(socket)
             time.sleep(1)
             toggleLED(socket)
             socket.settimeout(0)    # make receive nonblocking
-            print "successfully connected"
+            #print "successfully connected"
             return 1
-        except Socket.error:
-            print "failed to connect"
+        except Socket.error as e:
+            print "failed to connect",e
             return 0
     else:
         print "failed to find device"
@@ -44,8 +45,8 @@ def startStreaming(socket):
     # recv sometimes gives EAGAIN error
     try:
 	socket.send("\x07")
-    except:
-	print "Error Sending Start Streaming Comand"
+    except Socket.error as e:
+	print "Error Sending Start Streaming Comand",e
     	return -1
     else:
     	# short wait to prevent filling receiver buffer on Shimmer
@@ -55,8 +56,8 @@ def startStreaming(socket):
         		print "Started Streaming..."
     		else:
 			print "Invalid ACK Character"
-    	except:
-		print "Error reading ACK"
+    	except Socket.error as e:
+		print "Error reading ACK",e
 		return -1
     	else:
 		return 0
@@ -81,6 +82,7 @@ def sampleAccel(socket):
     
     data = socket.recv(maxSize)
     sizeRecv = len(data)
+    print sizeRecv
     accel_tuple = struct.unpack('B'*sizeRecv, data)
     #print data
     #print accel_tuple
