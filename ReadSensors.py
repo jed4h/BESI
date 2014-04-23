@@ -43,6 +43,7 @@ ftemp = open("temp", "w")
 flight = open("light", "w")
 faccel = open("accel", "w")
 fsound = open("sound", "w")
+ferror = open("error", "w")
 
 accelWriter = csv.writer(faccel)
 lightWriter = csv.writer(flight)
@@ -61,7 +62,7 @@ if IS_STREAMING:
         # connect to base station
         accelSock.connect(server_address_accel)
         # create a thread to communicate with Shimmer3 and base station
-        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, IS_STREAMING, IS_LOGGING))
+        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror,  IS_STREAMING, IS_LOGGING))
         # Thread will stop when parent is stopped
         accelThread.setDaemon(True)
         
@@ -101,7 +102,7 @@ except KeyboardInterrupt:
     print ""
     print "interrupted"
 finally:
-    
+    ferror.close()    
     ftemp.close()
     flight.close()
     faccel.close()
