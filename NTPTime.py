@@ -6,9 +6,9 @@ import socket
 import struct, time
 import datetime
 
-
-# # Set the socket parameters 
-def getDateTime():
+# accesses NTP server to get current time
+# not used
+def getDateTime_old():
     print "starting getDateTime()"
     host = "pool.ntp.org"
     port = 123
@@ -50,3 +50,10 @@ def getDateTime():
 
     print "Error Accessing NTP Server"
     return time.ctime(time.mktime(datetime.datetime.now().timetuple()))
+
+
+# returns current system time on the BBB
+# need to set correct time somewhere else for this to return the correct time
+def getDateTime():
+    return time.ctime(time.mktime(datetime.datetime.now().timetuple()))
+
