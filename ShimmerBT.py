@@ -1,16 +1,26 @@
+# functions used to interface with the Shimmer3 over Bluetooth
+# a full list of Bluetooth commands recognized by Shimmer can be obtained from the 
+# Shimmer3 firmware code
+# The commands used here are:
+# start streaming = 0x07
+# stop streaming = 0x20
+# toggle red LED = 0x06
+# request calib info = 0x13
+
 import lightblue
 import binascii
 import struct
 import time
 import socket as Socket
 
-# accelerometer packet format is:
+# accelerometer packet format in bytes is:
 # 0  |  timestamp_low  |  timestamp_high  |  x_accel_low  |  x_accel_high ...
 
 
 
 #connects to a shimmer with the given address
 def shimmer_connect(socket, addr, port):
+    # scanning takes several seconds, so just try to connect without scanning
     deviceFound = 1
     print "attempting to connect"
     # HDE Bluetooth dongle does not find shimmer, but can connect
@@ -43,6 +53,7 @@ def shimmer_connect(socket, addr, port):
         
 def startStreaming(socket):
     # recv sometimes gives EAGAIN error
+    # if sending command fails, return an error code and try again
     try:
 	socket.send("\x07")
     except Socket.error as e:
@@ -51,6 +62,7 @@ def startStreaming(socket):
     else:
     	# short wait to prevent filling receiver buffer on Shimmer
     	time.sleep(0.5)
+	# the expected response is 0xFF, but it usually is not after reconnecting
     	try:
     		if struct.unpack('B',socket.recv(1))[0] == 255:
         		print "Started Streaming..."
@@ -62,18 +74,18 @@ def startStreaming(socket):
     	else:
 		return 0
     
-    
+# not used. Streaming stops when the Bluetooth connection os broken
 def stopStreaming(socket):
     socket.send("\x20")
     
-    
+# toggles the state of the red LED on The Shimmer
 def toggleLED(socket):
     socket.send("\x06")
     
-# reads accelerometer data from the Bluetooth
+# reads 1 secnd of accelerometer data from the Bluetooth
 #returns lists of timestamps and accel. data
 def sampleAccel(socket):
-    maxSize = 2000      #1000 / 51.2Hz sampling rate * 9 bytes/sample = 2.17 seconds of data
+    maxSize = 2000      #2000 / 102.4Hz sampling rate * 9 bytes/sample = 2.17 seconds of data
     start = 0
     timestamp = []
     x_accel = []
@@ -113,6 +125,7 @@ def sampleAccel(socket):
             
     return timestamp, x_accel, y_accel, z_accel
 
+# write one second of data to a csv file
 def writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel):
     for value in range(len(z_accel)):
         accelWriter.writerow((timestamp[value], x_accel[value], y_accel[value], z_accel[value]))
@@ -120,10 +133,11 @@ def writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel):
 
 # get the LNA calibration data from the shimmer
 # calib message format is ACK | 0x12 | X Offset | Y Offset | Z Offset | X Sens | Y Sens | Z Sens | Alignment Matrix
-# Assumes allisgment is 1 0 0
-#                       0 1 0
-#                       0 0 1
+# this program assumes allisgment is 1 0 0
+#               	             0 1 0
+#                       	     0 0 1
 def readCalibInfo(socket):
+    # the calibration message is 23 bytes
     messageLen = 23
     base = 0    #in some test cases an extra 0xff byte is read at the beginning
   

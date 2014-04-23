@@ -1,3 +1,4 @@
+
 #taken from http://stackoverflow.com/questions/12664295/ntp-client-in-python
 from socket import AF_INET, SOCK_DGRAM
 import sys

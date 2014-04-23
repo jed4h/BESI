@@ -1,5 +1,8 @@
 #application to interface with the LM60BIZ analog temperature sensor
 # continouously samples and writes to the given csv
+##############
+##Deprecated##
+##############
 from gpio_utils import *
 from ShimmerBT import *
 from Constants import *

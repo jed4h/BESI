@@ -1,7 +1,8 @@
 # Program to collect data from a Shimmer3 over Bluetooth
-# Can log data to a file logally and/or stream to a host PC
-# The shimmer ID and host addr. are hardcoded and need to be changed for
-# different deployments
+# Can log data to a file locally and/or stream to a host PC
+# The shimmer ID is sent from the basestation
+# the basestation IP is a user input 
+ 
 
 
 #!/usr/bin/env python
@@ -49,14 +50,17 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
            
     #if streaming:
     #    accelSock.sendall("Accelerometer" + actualTime + "\n")
-        
+
+    # get start time of the BBB clock to calculate time deltas        
     startTime = datetime.datetime.now()
     time.sleep(1)
     print "Sending Start Streaming Command"
+    # send the start streaming command until successful
     while (startStreaming(s) == -1):
 	pass
     
     while True:
+	# if an exception is raised receiving data or connection is lost (streamingError == 1) try to reconnect
         try:
             if streamingError == 0:
                 (timestamp, x_accel, y_accel, z_accel) = sampleAccel(s)
@@ -68,6 +72,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
 		    actualTime = -1
 		    while(actualTime == -1):
 			actualTime = getDateTime()
+		    # log every disconnect event in a file
 		    ferror.write("Connection Lost. Time: {}\n".format(actualTime))
 
             streamingError = 1
@@ -79,6 +84,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
 		#string = packetize(struct.pack("HHHH", 0, 0, 0, 0))
                 string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
                 accelSock.sendall(string)
+	    # create a new socket object because the old one cannot be used 
             s.close()
             s = lightblue.socket()
             #attempt to reconnect
@@ -88,7 +94,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
 		actualTime = -1
 		while(actualTime == -1):
                 	actualTime = getDateTime()
-
+		# log reconnect events to a file
     		ferror.write("Connection Re-established. Time: {}\n".format(actualTime))
 
                 if logging:
