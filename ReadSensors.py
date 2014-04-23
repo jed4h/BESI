@@ -106,8 +106,9 @@ finally:
     flight.close()
     faccel.close()
     fsound.close()
-    accelSock.close()
-    lightSock.close()
-    soundSock.close()
-    tempSock.close()
+    if IS_STREAMING:
+        accelSock.close()
+        lightSock.close()
+        soundSock.close()
+        tempSock.close()
     print "Done"

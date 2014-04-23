@@ -18,18 +18,23 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, lo
     if logging:
         tempWriter.writerow(("Temperature", actualTime))
         soundWriter.writerow(("Noise Level", actualTime))
+        
+        startTime = datetime.datetime.now()
     
     while True:
+        currTime = datetime.datetime.now()
+        currTimeDelta = (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
+        
         proc = subprocess.Popen(["./ADC"], stdout=subprocess.PIPE,)
         output = proc.communicate()[0]
         split_output = output.split(',')
         
         for i in range((len(split_output) / 2) - 1):
             if logging:
-                soundWriter.writerow((split_output[2 * i], split_output[2 * i + 1]))
+                soundWriter.writerow((float(split_output[2 * i]) + currTimeDelta, split_output[2 * i + 1]))
                 
             if streaming:
-                soundSock.sendall("{0:0.4f},{1:05.2f},\n".format(float(split_output[2 * i]), float(split_output[2 * i + 1])))
+                soundSock.sendall("{0:015.4f},{1:05.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
         
         (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
         if logging:
