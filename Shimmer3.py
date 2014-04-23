@@ -30,7 +30,13 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
         conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
         if conn == 1:
             break
-    
+           
+	string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
+    	try:
+	    accelSock.sendall(string)
+	except:
+	    sys.exit()
+
     # give sensors some time to start up
     time.sleep(1)
     print "Connect Est. to {}".format(connID)
@@ -58,9 +64,14 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     startTime = datetime.datetime.now()
     time.sleep(1)
     print "Sending Start Streaming Command"
-    # send the start streaming command until successful
-    while (startStreaming(s) == -1):
-	pass
+    # try sending start streaming command 10 times
+    streamingError = 1
+    for attempt in range(10):
+    	if (startStreaming(s) != -1):
+	    streamingError = 0
+	    break
+    #while (startStreaming(s) == -1):
+    #	pass		
     
     while True:
 	# if an exception is raised receiving data or connection is lost (streamingError == 1) try to reconnect
@@ -106,9 +117,12 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
                 print "Sending Start Streaming Command"
-		while (startStreaming(s) == -1):
-			pass
-                streamingError = 0
+		for attempt in range(10):
+		    if (startStreaming(s) != -1):
+                	streamingError = 0
+			break	
+		#while (startStreaming(s) == -1):
+		#	pass
             else:
                 print "Error Connecting to Shimmer"
         else:
