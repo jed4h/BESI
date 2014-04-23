@@ -129,6 +129,20 @@ if IS_STREAMING:
         ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, IS_STREAMING, IS_LOGGING))
         ADCThread.setDaemon(True)
 
+
+# running the BBB without streaming is not well tested
+else:
+    if USE_ACCEL:
+        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter, None, ferror, SHIMMER_ID, IS_STREAMING, IS_LOGGING))
+	accelThread.setDaemon(True)
+    if USE_LIGHT:
+        lightThread = threading.Thread(target=lightSense, args=(lightWriter, None, IS_STREAMING, IS_LOGGING))
+	lightThread.setDaemon(True)
+    if USE_ADC:
+        ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, None, None, IS_STREAMING, IS_LOGGING))
+
+
+
 # trap keyboard interrupt
 try:
     if USE_ACCEL:
