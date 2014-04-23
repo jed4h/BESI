@@ -5,6 +5,7 @@ from Constants import *
 from NTPTime import *
 import time
 import csv
+import struct
 
 def lightSense(lightWriter, lightSock, streaming=True, logging=True):
     light_i2c = i2c_light_init(LIGHT_ADDR)
@@ -30,8 +31,10 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
             lightWriter.writerow(("{0:.2f}".format(currTimeDelta), "{0:.2f}".format(lightLevel)))
             
         if streaming:
-            lightSock.sendall(packetize("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel)))
-            
+            #lightSock.sendall(packetize("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel)))
+            lightSock.sendall(packetize(struct.pack("ff", currTimeDelta, lightLevel)))
+	              
+
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         
         

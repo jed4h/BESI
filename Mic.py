@@ -37,14 +37,16 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, lo
                 soundWriter.writerow((float(split_output[2 * i]) + currTimeDelta, split_output[2 * i + 1]))
                 
             if streaming:
-                soundSock.sendall(packetize("{0:015.4f},{1:05.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
+                #soundSock.sendall(packetize("{0:015.4f},{1:05.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
+                soundSock.sendall(packetize(struct.pack("ff",split_output[2 * i] + currTimeDelta, split_output[2 * i + 1]))
         
         (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
         if logging:
             tempWriter.writerow(("{0}".format(float(split_output[-2]) + currTimeDelta), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
             
         if streaming:
-            tempSock.sendall(packetize("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF)))
+            #tempSock.sendall(packetize("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF)))
+            tempSock.sendall(packetize(struct.pack("fff", split_output[-2] + currTimeDelta, tempC, tempF)))
     
 #ftemp.close()
 #fsound.close()
