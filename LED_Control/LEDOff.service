@@ -1,0 +1,9 @@
+[Unit]
+Description="Turns off the 4 user LEDs"
+
+[Service]
+type=simple
+ExecStart=/usr/bin/TurnOffLeds.sh
+
+[Install]
+WantedBy=multi-user.target
