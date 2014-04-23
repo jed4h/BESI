@@ -5,10 +5,14 @@ import Adafruit_BBIO.ADC as ADC
 import datetime
 import math
 from Adafruit_I2C import Adafruit_I2C
+import struct
 
 # adds a length field at the beginning of the data string
+# the header and data are raw bytes
 def packetize(data):
-	lenHeader = "{0:04},".format(len(data))
+	#lenHeader = "{0:04},".format(len(data))
+	lenHeader = struct.pack("H", len(data))
+	#print len(data)
 	return lenHeader + data
 	
 
