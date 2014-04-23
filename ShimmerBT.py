@@ -82,7 +82,7 @@ def sampleAccel(socket):
     
     data = socket.recv(maxSize)
     sizeRecv = len(data)
-    print sizeRecv
+    #print sizeRecv
     accel_tuple = struct.unpack('B'*sizeRecv, data)
     #print data
     #print accel_tuple
