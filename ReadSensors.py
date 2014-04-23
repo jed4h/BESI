@@ -164,8 +164,11 @@ finally:
     faccel.close()
     fsound.close()
     if IS_STREAMING:
-        accelSock.close()
-        lightSock.close()
-        soundSock.close()
-        tempSock.close()
+	if USE_ACCEL:
+            accelSock.close()
+	if USE_LIGHT:
+            lightSock.close()
+	if USE_ADC:
+            soundSock.close()
+            tempSock.close()
     print "Done"
