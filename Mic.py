@@ -38,7 +38,7 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, lo
                 
             if streaming:
                 #soundSock.sendall(packetize("{0:015.4f},{1:05.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
-                soundSock.sendall(packetize(struct.pack("ff",split_output[2 * i] + currTimeDelta, split_output[2 * i + 1]))
+                soundSock.sendall(packetize(struct.pack("ff",split_output[2 * i] + currTimeDelta, split_output[2 * i + 1])))
         
         (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
         if logging:
