@@ -38,10 +38,10 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, lo
         
         (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
         if logging:
-            tempWriter.writerow(("{0}".format(split_output[-2]), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
+            tempWriter.writerow(("{0}".format(float(split_output[-2]) + currTimeDelta), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
             
         if streaming:
-            tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]), tempC, tempF))
+            tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF))
     
 #ftemp.close()
 #fsound.close()
