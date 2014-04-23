@@ -73,16 +73,21 @@ int main(int argc, const char* argv[])
 
 	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN1, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\
 		open_dly, sample_dly, BBBIO_ADC_STEP_AVG_1, buffer_AIN_1, MIC_BUFFER_SIZE);
-	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN2, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\
+	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN2, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\ 
 		open_dly, sample_dly, BBBIO_ADC_STEP_AVG_1, buffer_AIN_2, PIR_BUFFER_SIZE);
 	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN3, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\
 		open_dly, sample_dly, BBBIO_ADC_STEP_AVG_1, buffer_AIN_3, PIR_BUFFER_SIZE);
-	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN0, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\
+	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN0, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS,\ 
 		open_dly, sample_dly, BBBIO_ADC_STEP_AVG_1, buffer_AIN_0, TEMP_BUFFER_SIZE);
 	
 	gettimeofday(&t_start, NULL);
 
-        BBBIO_ADCTSC_channel_enable(BBBIO_ADC_AIN1);
+        //int l = 60*5;
+	//while(l){
+	//l--;
+
+ 
+    BBBIO_ADCTSC_channel_enable(BBBIO_ADC_AIN1);
 	BBBIO_ADCTSC_channel_enable(BBBIO_ADC_AIN2);
 	BBBIO_ADCTSC_channel_enable(BBBIO_ADC_AIN3);
 	BBBIO_ADCTSC_channel_disable(BBBIO_ADC_AIN0);
@@ -111,12 +116,14 @@ int main(int argc, const char* argv[])
 			mic_avg = 0;
 			if ((k % SAMPLE_WINDOW) == 0){
 				//fprintf(adc_file, "%0.3f,%0.2f\n", mTime + TIMESTEP * (float)i, avg);
-				printf("%0.3f,%0.2f,%0.3f,%0.2f,", mTime + TIMESTEP * (float)i, pir1_avg,  mTime + TIMESTEP * (float)i, pir2_avg);
-				pir1_avg = 0; pir2_avg = 0;
+			//pir1_avg = (float)(pir1_avg / (float)SAMPLE_WINDOW);
+			//pir2_avg = (float)(pir2_avg / (float)SAMPLE_WINDOW);
+			printf("%0.3f,%0.2f,%0.3f,%0.2f,",mTime + TIMESTEP *(float)i, pir1_avg,mTime+TIMESTEP*(float)i,  pir2_avg);
+			pir1_avg = 0; pir2_avg = 0;
 			}
-			else{
-				printf("");
-			}
+		//	else{
+		//		printf("");
+		//	}
 			i++;
 		}
        	}
@@ -136,13 +143,17 @@ int main(int argc, const char* argv[])
 	//temp_file = fopen("temp.txt", "a");
 	//printf("temp: %0.3f\n", ((float)sample / 4095.0f) * 1.8f);
 	//fprintf(temp_file, "%0.3f,%0.4f\n", mTime, ((float)sample / 4095.0f) * 1.8f);
-	printf("%0.3f,%0.4f", mTime, ((float)temp_sample / 4095.0f) * 1.8f);
+	printf("%0.3f,%0.4f",mTime,((float)temp_sample / 4095.0f) * 1.8f);
 	//fclose(temp_file);
 	BBBIO_ADCTSC_channel_disable(BBBIO_ADC_AIN0);
+
+	
+	//}
 
 	iolib_free();
 	//fclose(adc_file);
 	return 0;
+
 }
 
 //High pass filter with cutoff frequency of approx. 0.03 * pi rad/sec (165 Hz for fs = 10 kHz)
@@ -152,3 +163,4 @@ float highPassFilter(float last_output, float input, float last_input){
 	return output;
 	
 }
+

@@ -47,13 +47,13 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 	    # every 11th sample is from the door sensor
 	    if (((i + 1) % 12) == 11):
 		if logging:
-		    doorWriter.writerow((float(split_output[2 * i - 2]) + currTimeDelta, split_output[2 * i - 1]))
 		    doorWriter.writerow((float(split_output[2 * i]) + currTimeDelta, split_output[2 * i + 1]))
+		    doorWriter.writerow((float(split_output[2 * i + 2]) + currTimeDelta, split_output[2 * i + 3]))
 		
 		if streaming:
 		    try:
-		    	doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i - 2]) + currTimeDelta,
-				     	 float(split_output[2 * i - 1]),float(split_output[2 * i + 1])))
+		    	doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta,
+				     	 float(split_output[2 * i + 1]),float(split_output[2 * i + 3])))
 		   # doorSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
 		    except:
 			sys.exit()
