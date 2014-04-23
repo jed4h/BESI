@@ -14,7 +14,10 @@ import subprocess
 #soundWriter = csv.writer(fsound)
 
 def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, logging = True):
-    actualTime = getDateTime()
+    
+    actualTime = -1
+    while(actualTime == -1):
+	actualTime = getDateTime()
     if logging:
         tempWriter.writerow(("Temperature", actualTime))
         soundWriter.writerow(("Noise Level", actualTime))

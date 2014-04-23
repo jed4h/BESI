@@ -8,7 +8,9 @@ import csv
 
 def lightSense(lightWriter, lightSock, streaming=True, logging=True):
     light_i2c = i2c_light_init(LIGHT_ADDR)
-    actualTime = getDateTime()
+    actualTime = -1
+    while(actualTime == -1):
+    	actualTime = getDateTime()
     if logging:
         lightWriter.writerow(("Lux", actualTime))
         
