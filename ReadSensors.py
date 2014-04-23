@@ -49,7 +49,7 @@ print ("Base Station IP Address: {0}".format(BaseStation_IP))
 print ("Relay Station ID: {0}".format(relayStation_ID))
 
 while default_settings != ("Y") and default_settings != ("y") and default_settings != ("N") and default_settings != ("n"):
-	default_settings = str(raw_input("Use Default Settings()? (Y/N):"))
+	default_settings = str(raw_input("Use Default Settings? (Y/N):"))
 
 
 if (default_settings == "N" or default_settings == "n"):
