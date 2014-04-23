@@ -50,11 +50,13 @@ flight = open("light", "w")
 faccel = open("accel", "w")
 fsound = open("sound", "w")
 ferror = open("error", "w")
+fdoor = open("door", "w")
 
 accelWriter = csv.writer(faccel)
 lightWriter = csv.writer(flight)
 tempWriter = csv.writer(ftemp)
 soundWriter = csv.writer(fsound)
+doorWriter = csv.writer(fdoor)
 
 # get the shimmerID and what sensors to use from the base station if we are streaming
 # if not streaming, use default values
