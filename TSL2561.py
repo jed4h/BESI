@@ -6,6 +6,7 @@ from NTPTime import *
 import time
 import csv
 import struct
+import sys
 
 def lightSense(lightWriter, lightSock, streaming=True, logging=True):
     light_i2c = i2c_light_init(LIGHT_ADDR)
@@ -20,7 +21,7 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
     while True:
         # calculate time since start
         currTime = datetime.datetime.now()
-        currTimeDelta = (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
+        currTimeDelta = (currTime - startTime).days * 86400 + (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
         # read light sensor
         # error reading i2c bus. Try to reinitialize sensor
         lightLevel = lux_calc(light_i2c.readU16(LIGHT_REG_LOW), light_i2c.readU16(LIGHT_REG_HIGH))
@@ -31,8 +32,11 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
             lightWriter.writerow(("{0:.2f}".format(currTimeDelta), "{0:.2f}".format(lightLevel)))
             
         if streaming:
-            lightSock.sendall("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel))
-            #lightSock.sendall(packetize(struct.pack("ff", currTimeDelta, lightLevel)))
+	    try:
+            	lightSock.sendall("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel))
+            	#lightSock.sendall(packetize(struct.pack("ff", currTimeDelta, lightLevel)))
+	    except:
+		sys.exit()
 	              
 
         time.sleep(LOOP_DELAY * UPDATE_DELAY)

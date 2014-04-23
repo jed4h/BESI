@@ -4,7 +4,7 @@ from socket import AF_INET, SOCK_DGRAM
 import sys
 import socket
 import struct, time
-
+import datetime
 
 
 # # Set the socket parameters 
@@ -21,26 +21,32 @@ def getDateTime():
     DST = 3600   # move time ahead 1 hour
     TIMEZONE = 4 * 3600 # EST
     TIME1970 = 2208988800L + TIMEZONE # 1970-01-01 00:00:00
-    
-    # connect to server
-    client = socket.socket( AF_INET, SOCK_DGRAM)
-    client.settimeout(2)    
 
-    try:
-    	client.sendto(msg, address)
-    	msg, address = client.recvfrom( buf )
-    except:
-	print "Error Accessing NTP Server"
-        return -1
-    else:
-    	t = struct.unpack( "!12I", msg )[10]
-    	#print t
-    	t -= TIME1970
-    	#print t
+    #############################
+    #Modified to check 100 times#
+    #############################
+    for i in range(100):
+    	# connect to server
+    	client = socket.socket( AF_INET, SOCK_DGRAM)
+    	client.settimeout(2)    
+
+    	try:
+    		client.sendto(msg, address)
+    		msg, address = client.recvfrom( buf )
+    	except:
+        	continue
+    	else:
+    		t = struct.unpack( "!12I", msg )[10]
+    		#print t
+    		t -= TIME1970
+    		#print t
     
-   	print "Conpleted getDateTime()"
-	try:
-    	    return time.ctime(t)
-	except:
-	    print "Error Processing Time"
-	    return -1
+   		print "Conpleted getDateTime()"
+		try:
+    	    		return time.ctime(t)
+		except:
+	    		print "Error Processing Time"
+	    		continue
+
+    print "Error Accessing NTP Server"
+    return time.ctime(time.mktime(datetime.datetime.now().timetuple()))

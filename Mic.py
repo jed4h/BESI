@@ -6,6 +6,7 @@ import socket
 import time
 import csv
 import subprocess
+import sys
 
 #ftemp = open("temp_test", 'w')
 #fsound = open("sound_test", "w")
@@ -31,7 +32,7 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
     while True:
 	# calculate the time since the start of the data collection
         currTime = datetime.datetime.now()
-        currTimeDelta = (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
+        currTimeDelta = (currTime - startTime).days * 86400 + (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
         
         # run the c code to get one second of data from the ADC
         proc = subprocess.Popen(["./ADC1"], stdout=subprocess.PIPE,)
@@ -50,10 +51,12 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 		    doorWriter.writerow((float(split_output[2 * i]) + currTimeDelta, split_output[2 * i + 1]))
 		
 		if streaming:
-		    doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i - 2]) + currTimeDelta,
-				      float(split_output[2 * i - 1]),float(split_output[2 * i + 1])))
+		    try:
+		    	doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i - 2]) + currTimeDelta,
+				     	 float(split_output[2 * i - 1]),float(split_output[2 * i + 1])))
 		   # doorSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
-
+		    except:
+			sys.exit()
 		i = i + 1
 
 	    else:		
@@ -61,8 +64,11 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 		    soundWriter.writerow((float(split_output[2 * i]) + currTimeDelta, split_output[2 * i + 1]))
                 
         	if streaming:
-                    soundSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
-                    #soundSock.sendall(packetize(struct.pack("ff",float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
+		    try:
+                    	soundSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
+                    	#soundSock.sendall(packetize(struct.pack("ff",float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
+		    except:
+			sys.exit()
 
 	    i = i + 1
         
@@ -72,9 +78,13 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
             tempWriter.writerow(("{0}".format(float(split_output[-2]) + currTimeDelta), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
             
         if streaming:
-            tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF))
-            #tempSock.sendall(struct.pack("fff", float(split_output[-2]) + currTimeDelta, tempC, tempF))
-    
+	    try:
+            	tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF))
+            	#tempSock.sendall(struct.pack("fff", float(split_output[-2]) + currTimeDelta, tempC, tempF))
+	    except:
+		sys.exit()    
+
+
 #ftemp.close()
 #fsound.close()
 #print "Done"

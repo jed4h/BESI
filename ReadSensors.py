@@ -90,6 +90,9 @@ if IS_STREAMING:
     USE_ADC = (splitData[1] == "True")
     USE_LIGHT = (splitData[2] == "True")
     SHIMMER_ID = splitData[3]
+    SHIMMER_ID2 = splitData[4]
+    SHIMMER_ID3 = splitData[5]
+
 
     synchSock.close()
 
@@ -106,7 +109,7 @@ if IS_STREAMING:
         # connect to base station
         accelSock.connect(server_address_accel)
         # create a thread to communicate with Shimmer3 and base station
-        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID,  IS_STREAMING, IS_LOGGING))
+        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID, SHIMMER_ID2, SHIMMER_ID3,  IS_STREAMING, IS_LOGGING))
         # Thread will stop when parent is stopped
         accelThread.setDaemon(True)
         
@@ -157,12 +160,19 @@ try:
         lightThread.start()
     if USE_ADC:
         ADCThread.start()
-    while True:
-        pass
+    #while True:
+    #    pass
+
+    if USE_ACCEL:
+	accelThread.join()
+    if USE_LIGHT:
+	lightThread.join()
+    if USE_ADC:
+	ADCThread.join()
     
-except KeyboardInterrupt:
+except:
     print ""
-    print "interrupted"
+    print "Exit"
 finally:
     ferror.close()    
     ftemp.close()
@@ -178,4 +188,5 @@ finally:
 	if USE_ADC:
             soundSock.close()
             tempSock.close()
+	    doorSock.close()
     print "Done"

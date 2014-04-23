@@ -14,9 +14,10 @@ import socket
 import time
 import csv
 import struct
+import sys
 
 
-def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, logging = True):
+def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
     
     
@@ -83,7 +84,10 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
             if streaming:
 		#string = packetize(struct.pack("HHHH", 0, 0, 0, 0))
                 string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
-                accelSock.sendall(string)
+		try:
+                    accelSock.sendall(string)
+		except:
+		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
             s.close()
             s = lightblue.socket()
@@ -115,7 +119,10 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, l
 		    #string = packetize(struct.pack("HHHH", timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
                     string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i])
                     if len(string) == 22:
-                    	accelSock.sendall(string)
+			try:
+                    	    accelSock.sendall(string)
+			except:
+			    sys.exit()
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         
