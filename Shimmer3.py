@@ -38,7 +38,9 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     #time.sleep(1)
     
     #write metadata at beginning of files (time and sensor for now)
-    actualTime = getDateTime()
+    actualTime = -1
+    while(actualTime == -1):
+    	actualTime = getDateTime()
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
         
@@ -73,7 +75,10 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
             if (shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT) == 1):
 		print "Connection Est."
                 time.sleep(1)
-                actualTime = getDateTime()
+		actualTime = -1
+		while(actualTime == -1):
+                	actualTime = getDateTime()
+
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
                 print "Sending Start Streaming Command"
