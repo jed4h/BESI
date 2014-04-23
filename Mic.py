@@ -45,7 +45,7 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, lo
             tempWriter.writerow(("{0}".format(float(split_output[-2]) + currTimeDelta), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
             
         if streaming:
-            tempSock.sendall(packetize("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF)))
+            tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF))
             #tempSock.sendall(struct.pack("fff", float(split_output[-2]) + currTimeDelta, tempC, tempF))
     
 #ftemp.close()
