@@ -69,6 +69,10 @@ BMOTOR : ${DEMO_PATH}Demo_BrushlessMotor/BrushlessMotor.c libBBBio.a
 ADC : ${DEMO_PATH}Demo_ADC/ADC.c libBBBio.a
 	gcc -o ADC ${DEMO_PATH}Demo_ADC/ADC.c -L ${LIB_PATH} -lBBBio -lm
 
+ADC1 : ${DEMO_PATH}Demo_ADC/ADC_try1.c libBBBio.a
+	gcc -o ADC1 ${DEMO_PATH}Demo_ADC/ADC_try1.c -L ${LIB_PATH} -lBBBio -lm
+
+
 ADC_VOICE : ${DEMO_PATH}Demo_ADC/ADC_voice.c libBBBio.a
 	gcc -o ADC_VOICE ${DEMO_PATH}Demo_ADC/ADC_voice.c -L ${LIB_PATH} -lBBBio -lm -pthread -O3
 
