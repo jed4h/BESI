@@ -3,6 +3,7 @@
 cp -f wifi-check.sh /usr/bin/wifi-check.sh
 cp -f wifi_check.py /usr/bin/wifi_check.py
 cp -f wifi-check.service /lib/systemd/system/wifi-check.service
+chmod +x /usr/bin/wifi-check.sh
 
 cp -f emailIP.sh /usr/bin/emailIP.sh
 cp -f emailSendTest.py /usr/bin/emailSendTest.py
