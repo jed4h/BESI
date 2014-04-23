@@ -41,9 +41,25 @@ def shimmer_connect(socket, addr, port):
         
         
 def startStreaming(socket):
-    socket.send("\x07")
-    if struct.unpack('B',socket.recv(1))[0] == 255:
-        print "Started Streaming..."
+    # recv sometimes gives EAGAIN error
+    try:
+	socket.send("\x07")
+    except:
+	print "Error Sending Start Streaming Comand"
+    	return -1
+    else:
+    	# short wait to prevent filling receiver buffer on Shimmer
+    	time.sleep(0.5)
+    	try:
+    		if struct.unpack('B',socket.recv(1))[0] == 255:
+        		print "Started Streaming..."
+    		else:
+			print "Invalid ACK Character"
+    	except:
+		print "Error reading ACK"
+		return -1
+    	else:
+		return 0
     
     
 def stopStreaming(socket):

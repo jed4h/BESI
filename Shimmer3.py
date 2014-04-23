@@ -28,11 +28,12 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     
     # give sensors some time to start up
     time.sleep(1)
+    print "Connect Est."
     #read calibration info
-    try:            #disconnect while reading calib info can cause exception. Ignore for now
-        calib = readCalibInfo(s)
-    except:
-        pass
+    #try:            #disconnect while reading calib info can cause exception. Ignore for now
+    #calib = readCalibInfo(s)
+    #except:
+    #    pass
     #calib.printCalib()
     #time.sleep(1)
     
@@ -46,7 +47,9 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
         
     startTime = datetime.datetime.now()
     time.sleep(1)
-    startStreaming(s)
+    print "Sending Start Streaming Command"
+    while (startStreaming(s) == -1):
+	pass
     
     while True:
         try:
@@ -68,11 +71,14 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
             s = lightblue.socket()
             #attempt to reconnect
             if (shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT) == 1):
+		print "Connection Est."
                 time.sleep(1)
                 actualTime = getDateTime()
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
-                startStreaming(s)
+                print "Sending Start Streaming Command"
+		while (startStreaming(s) == -1):
+			pass
                 streamingError = 0
             else:
                 print "Error Connecting to Shimmer"
