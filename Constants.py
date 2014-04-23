@@ -1,5 +1,5 @@
 #Constants used in BBB BESI code
-SHIMMER_BASE = "00:06:66:66:"   # base bt address of Shimmer        
+SHIMMER_BASE = "00:06:66:"   # base bt address of Shimmer        
 SHIMMER_ID = "94:A0"            # varies among shimmers - when streaming the ShimmerID is sent by the basestation
 PORT = 1                        # common to all shimmers
 LIGHT_ADDR = 0x39               # i2c address of light sensor
