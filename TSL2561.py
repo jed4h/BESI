@@ -6,7 +6,7 @@ from NTPTime import *
 import time
 import csv
 
-def lightSense(lightWriter):
+def lightSense(lightWriter, lightSock):
     light_i2c = i2c_light_init(LIGHT_ADDR)
     actualTime = getDateTime()
     lightWriter.writerow(("Lux", actualTime))
@@ -23,6 +23,7 @@ def lightSense(lightWriter):
             light_i2c = i2c_light_init(LIGHT_ADDR)
                 
         lightWriter.writerow(("{0:.2f}".format(currTimeDelta), "{0:.2f}".format(lightLevel)))
+        lightSock.sendall("{0:07.2f}".format(lightLevel))
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         
         

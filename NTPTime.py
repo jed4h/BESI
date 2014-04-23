@@ -16,7 +16,8 @@ def getDateTime():
     
     
     # reference time (in seconds since 1900-01-01 00:00:00)
-    TIME1970 = 2208988800L # 1970-01-01 00:00:00
+    NO_DST = 3600   # move time ahead 1 hour
+    TIME1970 = 2208988800L - NO_DST # 1970-01-01 00:00:00
     
     # connect to server
     client = socket.socket( AF_INET, SOCK_DGRAM)
@@ -24,7 +25,9 @@ def getDateTime():
     msg, address = client.recvfrom( buf )
     
     t = struct.unpack( "!12I", msg )[10]
+    print t
     t -= TIME1970
+    print t
     
     
     return time.ctime(t)

@@ -7,8 +7,9 @@ import socket
 import time
 import csv
 
-def shimmerSense(accelWriter):
+def shimmerSense(accelWriter, accelSock):
     streamingError = 0  # set to 1 if we lose connecting while streaming
+    lastTimeStamp = 0
     
     s = lightblue.socket()
     # attempt to connect until successful
@@ -27,6 +28,7 @@ def shimmerSense(accelWriter):
     #write metadata at beginning of files (time and sensor for now)
     actualTime = getDateTime()
     accelWriter.writerow(("Accelerometer", actualTime))
+    #accelSock.sendall("Accelerometer" + actualTime + "\n")
     startTime = datetime.datetime.now()
     #time.sleep(1)
     startStreaming(s)
@@ -56,6 +58,13 @@ def shimmerSense(accelWriter):
         else:
             #write accel values to a csv file
             writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel)
+            
+            for i in range(len(z_accel)):
+                accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
+            #accelSock.sendall("{0}\n".format(timestamp))
+            #accelSock.sendall("{0}\n".format(x_accel))
+            #accelSock.sendall("{0}\n".format(y_accel))
+            #accelSock.sendall("{0}\n".format(z_accel))
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         

@@ -34,19 +34,37 @@ import threading
 i=0
 streamingError = 0  # set to 1 if we lose connecting while streaming
 
+host = '128.143.24.152'
+
 
 ftemp = open("temp", 'w')
 flight = open("light", "w")
 faccel = open("accel", 'w')
+
+#stream to base station instead of write to file
+accelSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+lightSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+soundSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+server_address = (host, 10000)
+server_address2 = (host, 10001)
+server_address3 = (host, 10002)
+
+print >>sys.stderr, 'connecting to %s port %s' % server_address
+print >>sys.stderr, 'connecting to %s port %s' % server_address2
+print >>sys.stderr, 'connecting to %s port %s' % server_address3
+
+accelSock.connect(server_address)
+lightSock.connect(server_address2)
 
 accelWriter = csv.writer(faccel)
 lightWriter = csv.writer(flight)
 tempWriter = csv.writer(ftemp)
 
 # create a thread to manage each sensor
-lightThread = threading.Thread(target=lightSense, args=(lightWriter,))
+lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock))
 tempThread = threading.Thread(target=tempSense, args=(tempWriter,))
-accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,))
+accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock))
 soundThread = threading.Thread(target=soundSense)
 
 lightThread.setDaemon(True)
@@ -71,4 +89,5 @@ finally:
     ftemp.close()
     flight.close()
     faccel.close()
+    accelSock.close()
     print "Done"
