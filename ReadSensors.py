@@ -10,7 +10,7 @@ import socket
 import time
 import csv
 import threading
-
+import sys
 
 # reads analog in from temperature sensor connected to AIN0
 # reads Montion sensor connected to GPIO0_7 and writes value to 
@@ -36,7 +36,11 @@ import threading
 #i=0
 #streamingError = 0  # set to 1 if we lose connecting while streaming
 
-#host = '172.25.98.25'
+if len(sys.argv) == 2:
+    hostIP = str(sys.argv[1])
+else:
+    hostIP = HOST
+    print "No IP address given, using default"
 
 
 ftemp = open("temp", "w")
@@ -57,7 +61,7 @@ if IS_STREAMING:
         # create socket
         accelSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # create socket address to send data to base station
-        server_address_accel = (HOST, BASE_PORT)
+        server_address_accel = (hostIP, BASE_PORT)
         print >>sys.stderr, 'connecting to %s port %s' % server_address_accel
         # connect to base station
         accelSock.connect(server_address_accel)
@@ -68,7 +72,7 @@ if IS_STREAMING:
         
     if USE_LIGHT:
         lightSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address_light = (HOST, BASE_PORT + 1)
+        server_address_light = (hostIP, BASE_PORT + 1)
         print >>sys.stderr, 'connecting to %s port %s' % server_address_light
         lightSock.connect(server_address_light)
         lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock, IS_STREAMING, IS_LOGGING))
@@ -77,8 +81,8 @@ if IS_STREAMING:
     if USE_ADC:
         soundSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tempSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address_sound = (HOST, BASE_PORT + 2)
-        server_address_temp = (HOST, BASE_PORT + 3)
+        server_address_sound = (hostIP, BASE_PORT + 2)
+        server_address_temp = (hostIP, BASE_PORT + 3)
         print >>sys.stderr, 'connecting to %s port %s' % server_address_sound
         print >>sys.stderr, 'connecting to %s port %s' % server_address_temp
         soundSock.connect(server_address_sound)
