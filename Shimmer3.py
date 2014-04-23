@@ -14,7 +14,7 @@ import time
 import csv
 
 
-def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
+def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
     
     
@@ -43,7 +43,9 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     	actualTime = getDateTime()
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
-        
+ 
+    ferror.write("Connection Established. Time: {}\n".format(actualTime))
+           
     #if streaming:
     #    accelSock.sendall("Accelerometer" + actualTime + "\n")
         
@@ -61,6 +63,12 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
                 raise socket.error
             # if the connection is lost: close the socket, create an new one and try to reconnect
         except socket.error:
+	    if streamingError == 0:
+		    actualTime = -1
+		    while(actualTime == -1):
+			actualTime = getDateTime()
+		    ferror.write("Connection Lost. Time: {}\n".format(actualTime))
+
             streamingError = 1
             print "error sampling accelerometers"
             if logging:
@@ -78,6 +86,8 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
 		actualTime = -1
 		while(actualTime == -1):
                 	actualTime = getDateTime()
+
+    		ferror.write("Connection Re-established. Time: {}\n".format(actualTime))
 
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
