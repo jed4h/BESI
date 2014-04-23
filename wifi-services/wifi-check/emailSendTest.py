@@ -15,7 +15,7 @@ while not sent:
 	myIP = sock.getsockname()[0]
 	sent = True
     except:
-	print error
+	print "error"
 
     time.sleep(5)
 
