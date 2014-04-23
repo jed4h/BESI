@@ -72,7 +72,7 @@ def toggleLED(socket):
 # reads accelerometer data from the Bluetooth
 #returns lists of timestamps and accel. data
 def sampleAccel(socket):
-    maxSize = 1000      #1000 / 51.2Hz sampling rate * 9 bytes/sample = 2.17 seconds of data
+    maxSize = 2000      #1000 / 51.2Hz sampling rate * 9 bytes/sample = 2.17 seconds of data
     start = 0
     timestamp = []
     x_accel = []
