@@ -15,7 +15,7 @@ import csv
 import struct
 
 
-def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = True):
+def shimmerSense(accelWriter, accelSock, ferror, ShimmerID,  streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
     
     
@@ -23,7 +23,7 @@ def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = Tru
     while True:
         # need to create a new socket afer every disconnect/ failed connect
         s = lightblue.socket()
-        conn = shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT)
+        conn = shimmer_connect(s, SHIMMER_BASE + ShimmerID, PORT)
         if conn == 1:
             break
     
@@ -82,7 +82,7 @@ def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = Tru
             s.close()
             s = lightblue.socket()
             #attempt to reconnect
-            if (shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT) == 1):
+            if (shimmer_connect(s, SHIMMER_BASE + ShimmerID, PORT) == 1):
 		print "Connection Est."
                 time.sleep(1)
 		actualTime = -1

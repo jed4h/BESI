@@ -36,12 +36,14 @@ import sys
 #i=0
 #streamingError = 0  # set to 1 if we lose connecting while streaming
 
-if len(sys.argv) == 2:
-    hostIP = str(sys.argv[1])
-else:
-    hostIP = HOST
-    print "No IP address given, using default"
+#if len(sys.argv) == 2:
+#    hostIP = str(sys.argv[1])
+#else:
+#    hostIP = HOST
+#    print "No IP address given, using default"
 
+hostIP = str(raw_input("Enter the base station IP address: "))
+BASE_PORT = int(raw_input("Enter the relay station ID (port): "))
 
 ftemp = open("temp", "w")
 flight = open("light", "w")
@@ -53,6 +55,42 @@ accelWriter = csv.writer(faccel)
 lightWriter = csv.writer(flight)
 tempWriter = csv.writer(ftemp)
 soundWriter = csv.writer(fsound)
+
+# get the shimmerID and what sensors to use from the base station if we are streaming
+# if not streaming, use default values
+if IS_STREAMING:
+    synchSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address_synch = (hostIP, BASE_PORT)
+    print "connecting to %s port %s" % server_address_synch
+    synchSock.connect(server_address_synch)
+
+    # receive info
+    # get 3 byte length first
+    msgLen = ''
+    while (len(msgLen) != 3):
+	try:
+    	    msgLen = msgLen + synchSock.recv(3)
+	except:
+	    pass
+
+    msgLen = int(msgLen)
+    data = ''    
+    # call recv until we get all the data
+    while (len(data) != msgLen):
+	try:
+	    data = data + synchSock.recv(msgLen)
+	except:
+	    pass
+        
+    splitData = data.split(",")
+    #data format is <USE_ACCEL>,<USE_ADC>,<USE_LIGHT>,<ShimmerID>
+    USE_ACCEL = (splitData[0] == "True")
+    USE_ADC = (splitData[1] == "True")
+    USE_LIGHT = (splitData[2] == "True")
+    SHIMMER_ID = splitData[3]
+
+    synchSock.close()
+
 
 #stream to base station 
 if IS_STREAMING:
@@ -66,7 +104,7 @@ if IS_STREAMING:
         # connect to base station
         accelSock.connect(server_address_accel)
         # create a thread to communicate with Shimmer3 and base station
-        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror,  IS_STREAMING, IS_LOGGING))
+        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID,  IS_STREAMING, IS_LOGGING))
         # Thread will stop when parent is stopped
         accelThread.setDaemon(True)
         
