@@ -76,8 +76,8 @@ def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = Tru
                 # 0, 0, 0, 0 indicates lost connection
                 writeAccel(accelWriter, [0], [0], [0] ,[0])
             if streaming:
-		string = packetize(struct.pack("HHHH", 0, 0, 0, 0))
-                #string = packetize("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0))
+		#string = packetize(struct.pack("HHHH", 0, 0, 0, 0))
+                string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
                 accelSock.sendall(string)
             s.close()
             s = lightblue.socket()
@@ -106,10 +106,10 @@ def shimmerSense(accelWriter, accelSock, ferror, streaming = True, logging = Tru
             
             if streaming:
                 for i in range(len(z_accel)):
-		    string = packetize(struct.pack("HHHH", timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
-                    #string = packetize("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
-                    #if len(string) == 22:
-                    accelSock.sendall(string)
+		    #string = packetize(struct.pack("HHHH", timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
+                    string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i])
+                    if len(string) == 22:
+                    	accelSock.sendall(string)
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         
