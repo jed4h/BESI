@@ -42,8 +42,22 @@ import sys
 #    hostIP = HOST
 #    print "No IP address given, using default"
 
-hostIP = str(raw_input("Enter the base station IP address: "))
-BASE_PORT = int(raw_input("Enter the relay station ID (port): "))
+default_settings = ''
+
+print ("Default Settings:")
+print ("Base Station IP Address: {0}".format(BaseStation_IP))
+print ("Relay Station ID: {0}".format(relayStation_ID))
+
+while default_settings != ("Y") and default_settings != ("y") and default_settings != ("N") and default_settings != ("n"):
+	default_settings = str(raw_input("Use Default Settings()? (Y/N):"))
+
+
+if (default_settings == "N" or default_settings == "n"):
+	hostIP = str(raw_input("Enter the base station IP address: "))
+	BASE_PORT = int(raw_input("Enter the relay station ID (port): "))
+else:
+	hostIP = BaseStation_IP
+	BASE_PORT = relayStation_ID 
 
 ftemp = open("temp", "w")
 flight = open("light", "w")
@@ -142,7 +156,7 @@ if IS_STREAMING:
 # running the BBB without streaming is not well tested
 else:
     if USE_ACCEL:
-        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter, None, ferror, SHIMMER_ID, IS_STREAMING, IS_LOGGING))
+        accelThread = threading.Thread(target=shimmerSense, args=(accelWriter, None, ferror, SHIMMER_ID, SHIMMER_ID, SHIMMER_ID,  IS_STREAMING, IS_LOGGING))
 	accelThread.setDaemon(True)
     if USE_LIGHT:
         lightThread = threading.Thread(target=lightSense, args=(lightWriter, None, IS_STREAMING, IS_LOGGING))
