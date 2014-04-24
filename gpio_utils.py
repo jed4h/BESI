@@ -6,6 +6,11 @@ import datetime
 import math
 from Adafruit_I2C import Adafruit_I2C
 
+# adds a length field at the beginning of the data string
+def packetize(data):
+	lenHeader = "{0:04},".format(len(data))
+	return lenHeader + data
+	
 
 def gpio_output(pin):
         GPIO.setup(pin, GPIO.OUT)

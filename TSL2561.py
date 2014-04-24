@@ -30,7 +30,7 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
             lightWriter.writerow(("{0:.2f}".format(currTimeDelta), "{0:.2f}".format(lightLevel)))
             
         if streaming:
-            lightSock.sendall("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel))
+            lightSock.sendall(packetize("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel)))
             
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         
