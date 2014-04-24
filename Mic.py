@@ -14,6 +14,11 @@ import subprocess
 #soundWriter = csv.writer(fsound)
 
 def soundSense(tempWriter, soundWriter,soundSock, tempSock, streaming = True, logging = True):
+    actualTime = getDateTime()
+    if logging:
+        tempWriter.writerow(("Temperature", actualTime))
+        soundWriter.writerow(("Noise Level", actualTime))
+    
     while True:
         proc = subprocess.Popen(["./ADC"], stdout=subprocess.PIPE,)
         output = proc.communicate()[0]

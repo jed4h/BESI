@@ -25,9 +25,9 @@ def getDateTime():
     msg, address = client.recvfrom( buf )
     
     t = struct.unpack( "!12I", msg )[10]
-    print t
+    #print t
     t -= TIME1970
-    print t
+    #print t
     
     
     return time.ctime(t)

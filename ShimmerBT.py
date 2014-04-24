@@ -112,7 +112,7 @@ def readCalibInfo(socket):
     time.sleep(0.5) 
     data = socket.recv(messageLen)
     calib_tuple = struct.unpack('B'*messageLen, data)
-    #print calib_tuple
+    #switch endieness
     Xoff = (calib_tuple[2 + base] << 8) + calib_tuple[3 + base]
     Yoff = (calib_tuple[4 + base] << 8) + calib_tuple[5 + base]
     Zoff = (calib_tuple[6 + base] << 8) + calib_tuple[7 + base]

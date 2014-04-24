@@ -41,8 +41,8 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
         
-    if streaming:
-        accelSock.sendall("Accelerometer" + actualTime + "\n")
+    #if streaming:
+    #    accelSock.sendall("Accelerometer" + actualTime + "\n")
         
     startTime = datetime.datetime.now()
     time.sleep(1)
