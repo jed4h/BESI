@@ -17,9 +17,11 @@ import csv
 def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
     
-    s = lightblue.socket()
+    
     # attempt to connect until successful
     while True:
+        # need to create a new socket afer every disconnect/ failed connect
+        s = lightblue.socket()
         conn = shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT)
         if conn == 1:
             break
@@ -27,7 +29,10 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     # give sensors some time to start up
     time.sleep(1)
     #read calibration info
-    calib = readCalibInfo(s)
+    try:            #disconnect while reading calib info can cause exception. Ignore for now
+        calib = readCalibInfo(s)
+    except:
+        pass
     #calib.printCalib()
     #time.sleep(1)
     
@@ -35,9 +40,12 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     actualTime = getDateTime()
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
-    #accelSock.sendall("Accelerometer" + actualTime + "\n")
+        
+    if streaming:
+        accelSock.sendall("Accelerometer" + actualTime + "\n")
+        
     startTime = datetime.datetime.now()
-    #time.sleep(1)
+    time.sleep(1)
     startStreaming(s)
     
     while True:
@@ -51,9 +59,11 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
             streamingError = 1
             print "error sampling accelerometers"
             if logging:
+                # 0, 0, 0, 0 indicates lost connection
                 writeAccel(accelWriter, [0], [0], [0] ,[0])
             if streaming:
-                accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0))
+                string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
+                accelSock.sendall(string)
             s.close()
             s = lightblue.socket()
             #attempt to reconnect
@@ -73,7 +83,9 @@ def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
             
             if streaming:
                 for i in range(len(z_accel)):
-                    accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
+                    string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i])
+                    if len(string) == 22:
+                        accelSock.sendall(string)
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         

@@ -11,13 +11,14 @@ import socket as Socket
 
 #connects to a shimmer with the given address
 def shimmer_connect(socket, addr, port):
-    deviceFound = 0
+    deviceFound = 1
     print "attempting to connect"
-    devices = lightblue.finddevices()
+    # HDE Bluetooth dongle does not find shimmer, but can connect
+    #devices = lightblue.finddevices()
   
-    for device in devices:
-            if device[0] == addr:
-                deviceFound = 1
+   #for device in devices:
+    #        if device[0] == addr:
+     #           deviceFound = 1
     
         
     if deviceFound == 1:   

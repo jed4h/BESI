@@ -31,10 +31,10 @@ import threading
 
 
 
-i=0
-streamingError = 0  # set to 1 if we lose connecting while streaming
+#i=0
+#streamingError = 0  # set to 1 if we lose connecting while streaming
 
-host = '172.25.99.71'
+#host = '172.25.98.25'
 
 
 ftemp = open("temp", "w")
@@ -42,44 +42,65 @@ flight = open("light", "w")
 faccel = open("accel", "w")
 fsound = open("sound", "w")
 
-#stream to base station instead of write to file
-accelSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-lightSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-adcSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server_address = (host, 10000)
-server_address2 = (host, 10001)
-server_address3 = (host, 10002)
-
-print >>sys.stderr, 'connecting to %s port %s' % server_address
-print >>sys.stderr, 'connecting to %s port %s' % server_address2
-print >>sys.stderr, 'connecting to %s port %s' % server_address3
-
-accelSock.connect(server_address)
-lightSock.connect(server_address2)
-adcSock.connect(server_address3)
-
 accelWriter = csv.writer(faccel)
 lightWriter = csv.writer(flight)
 tempWriter = csv.writer(ftemp)
 soundWriter = csv.writer(fsound)
 
-# create a thread to manage each sensor
-lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock))#tempThread = threading.Thread(target=tempSense, args=(tempWriter,))
-accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock))
-soundThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, adcSock, True))
+if IS_STREAMING:
+    #stream to base station instead of write to file
+    if USE_ACCEL:
+        accelSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if USE_LIGHT:
+        lightSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if USE_ADC:
+        soundSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tempSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    if USE_ACCEL:
+        server_address_accel = (HOST, BASE_PORT)
+    if USE_LIGHT:
+        server_address_light = (HOST, BASE_PORT + 1)
+    if USE_ADC:
+        server_address_sound = (HOST, BASE_PORT + 2)
+        server_address_temp = (HOST, BASE_PORT + 3)
+    
+    if USE_ACCEL:
+        print >>sys.stderr, 'connecting to %s port %s' % server_address_accel
+    if USE_LIGHT:
+        print >>sys.stderr, 'connecting to %s port %s' % server_address_light
+    if USE_ADC:
+        print >>sys.stderr, 'connecting to %s port %s' % server_address_sound
+        print >>sys.stderr, 'connecting to %s port %s' % server_address_temp
+    
+    if USE_ACCEL:
+        accelSock.connect(server_address_accel)
+    if USE_LIGHT:
+        lightSock.connect(server_address_light)
+    if USE_ADC:
+        soundSock.connect(server_address_sound)
+        tempSock.connect(server_address_temp)
 
-lightThread.setDaemon(True)
-#tempThread.setDaemon(True)
-accelThread.setDaemon(True)
-soundThread.setDaemon(True)
+# create a thread to manage each sensor
+if USE_ACCEL:
+    accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, streaming = IS_STREAMING, logging = IS_LOGGING))
+    accelThread.setDaemon(True)
+if USE_LIGHT:
+    lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock, streaming = IS_STREAMING, logging = IS_LOGGING))#tempThread = threading.Thread(target=tempSense, args=(tempWriter,))
+    lightThread.setDaemon(True)
+if USE_ADC:
+    ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, streaming = IS_STREAMING, logging = IS_LOGGING))
+    ADCThread.setDaemon(True)
+
+
+
+
 
 # trap keyboard interrupt
 try:
     lightThread.start()
-#    tempThread.start()
     accelThread.start()
-    soundThread.start()
+    ADCThread.start()
     while True:
         pass
     
@@ -91,5 +112,9 @@ finally:
     ftemp.close()
     flight.close()
     faccel.close()
+    fsound.close()
     accelSock.close()
+    lightSock.close()
+    soundSock.close()
+    tempSock.close()
     print "Done"
