@@ -34,10 +34,10 @@ def shimmer_connect(addr, port):
     if deviceFound == 1:   
         #attemp to connect to shimmer
         for address in addr:
-        socket = lightblue.socket()
+            socket = lightblue.socket()
             try:
             	socket.connect((address, port))
-	    	print "successfully Connected"
+	    	print "successfully Connected to {}".format(address)
             	toggleLED(socket)
             	time.sleep(1)
             	toggleLED(socket)

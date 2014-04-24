@@ -27,13 +27,13 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     # attempt to connect until successful
     while True:
         # need to create a new socket afer every disconnect/ failed connect
-        conn, s = shimmer_connect(ShimmerIDs, PORT)
+        conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
         if conn == 1:
             break
     
     # give sensors some time to start up
     time.sleep(1)
-    print "Connect Est."
+    print "Connect Est. to {}".format(connID)
     #read calibration info
     #try:            #disconnect while reading calib info can cause exception. Ignore for now
     #calib = readCalibInfo(s)
@@ -49,7 +49,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
  
-    ferror.write("Connection Established. Time: {}\n".format(actualTime))
+    ferror.write("Connection Established to {}. Time: {}\n".format(connID, actualTime))
            
     #if streaming:
     #    accelSock.sendall("Accelerometer" + actualTime + "\n")
@@ -76,7 +76,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    while(actualTime == -1):
 			actualTime = getDateTime()
 		    # log every disconnect event in a file
-		    ferror.write("Connection Lost. Time: {}\n".format(actualTime))
+		    ferror.write("Connection Lost from {}. Time: {}\n".format(connID, actualTime))
 
             streamingError = 1
             print "error sampling accelerometers"
@@ -93,15 +93,15 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    # create a new socket object because the old one cannot be used 
             s.close()
             #attempt to reconnect
-            conn, s = shimmer_connect(ShimmerIDs, PORT)
+            conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
             if (conn == 1):
-		print "Connection Est."
+		print "Connection Est. to {}".format(connID)
                 time.sleep(1)
 		actualTime = -1
 		while(actualTime == -1):
                 	actualTime = getDateTime()
 		# log reconnect events to a file
-    		ferror.write("Connection Re-established. Time: {}\n".format(actualTime))
+    		ferror.write("Connection Re-established to {}. Time: {}\n".format(connID, actualTime))
 
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
