@@ -10,6 +10,6 @@ while True:
 	sock.connect(("8.8.8.8", 80))
     except socket.error as e:
  	print "Network Error",e
-	subprocess.Popen(["./wifi-reset.sh"])
+	subprocess.Popen(["/usr/bin/wifi-reset.sh"])
 
     time.sleep(5)
