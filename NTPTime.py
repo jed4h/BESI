@@ -23,13 +23,23 @@ def getDateTime():
     
     # connect to server
     client = socket.socket( AF_INET, SOCK_DGRAM)
-    client.sendto(msg, address)
-    msg, address = client.recvfrom( buf )
+    client.settimeout(2)    
+
+    try:
+    	client.sendto(msg, address)
+    	msg, address = client.recvfrom( buf )
+    except:
+	print "Error Accessing NTP Server"
+        return -1
+    else:
+    	t = struct.unpack( "!12I", msg )[10]
+    	#print t
+    	t -= TIME1970
+    	#print t
     
-    t = struct.unpack( "!12I", msg )[10]
-    #print t
-    t -= TIME1970
-    #print t
-    
-    print "Conpleted getDateTime()"
-    return time.ctime(t)
+   	print "Conpleted getDateTime()"
+	try:
+    	    return time.ctime(t)
+	except:
+	    print "Error Processing Time"
+	    return -1
