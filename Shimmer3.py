@@ -1,3 +1,9 @@
+# Program to collect data from a Shimmer3 over Bluetooth
+# Can log data to a file logally and/or stream to a host PC
+# The shimmer ID and host addr. are hardcoded and need to be changed for
+# different deployments
+
+
 #!/usr/bin/env python
 from gpio_utils import *
 from ShimmerBT import *
@@ -7,9 +13,9 @@ import socket
 import time
 import csv
 
-def shimmerSense(accelWriter, accelSock):
+
+def shimmerSense(accelWriter, accelSock, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
-    lastTimeStamp = 0
     
     s = lightblue.socket()
     # attempt to connect until successful
@@ -27,7 +33,8 @@ def shimmerSense(accelWriter, accelSock):
     
     #write metadata at beginning of files (time and sensor for now)
     actualTime = getDateTime()
-    accelWriter.writerow(("Accelerometer", actualTime))
+    if logging:
+        accelWriter.writerow(("Accelerometer", actualTime))
     #accelSock.sendall("Accelerometer" + actualTime + "\n")
     startTime = datetime.datetime.now()
     #time.sleep(1)
@@ -43,28 +50,30 @@ def shimmerSense(accelWriter, accelSock):
         except socket.error:
             streamingError = 1
             print "error sampling accelerometers"
-            writeAccel(accelWriter, [0], [0], [0] ,[0])
+            if logging:
+                writeAccel(accelWriter, [0], [0], [0] ,[0])
+            if streaming:
+                accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0))
             s.close()
             s = lightblue.socket()
             #attempt to reconnect
             if (shimmer_connect(s, SHIMMER_BASE + SHIMMER_ID, PORT) == 1):
                 time.sleep(1)
                 actualTime = getDateTime()
-                accelWriter.writerow(("Accelerometer", actualTime))
+                if logging:
+                    accelWriter.writerow(("Accelerometer", actualTime))
                 startStreaming(s)
                 streamingError = 0
             else:
                 print "Error Connecting to Shimmer"
         else:
             #write accel values to a csv file
-            writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel)
+            if logging:
+                writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel)
             
-            for i in range(len(z_accel)):
-                accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
-            #accelSock.sendall("{0}\n".format(timestamp))
-            #accelSock.sendall("{0}\n".format(x_accel))
-            #accelSock.sendall("{0}\n".format(y_accel))
-            #accelSock.sendall("{0}\n".format(z_accel))
+            if streaming:
+                for i in range(len(z_accel)):
+                    accelSock.sendall("{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
         

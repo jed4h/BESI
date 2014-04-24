@@ -7,16 +7,33 @@ import time
 import csv
 import subprocess
 
+#ftemp = open("temp_test", 'w')
+#fsound = open("sound_test", "w")
 
-#def soundSense(temp_writer, sound_writer, adcSock):
-proc = subprocess.Popen(["./ADC"], stdout=subprocess.PIPE,)
-output = proc.communicate()[0]
-split_output = output.split(',')
+#tempWriter = csv.writer(ftemp)
+#soundWriter = csv.writer(fsound)
 
-for i in range((len(split_output) / 2) - 1):
+def soundSense(tempWriter, soundWriter, adcSock, streaming = True, logging = True):
+    while True:
+        proc = subprocess.Popen(["./ADC"], stdout=subprocess.PIPE,)
+        output = proc.communicate()[0]
+        split_output = output.split(',')
+        
+        for i in range((len(split_output) / 2) - 1):
+            if logging:
+                soundWriter.writerow((split_output[2 * i], split_output[2 * i + 1]))
+                
+            if streaming:
+                adcSock.sendall("{0:0.4f},{1:02.2f},\n".format(float(split_output[2 * i]), float(split_output[2 * i + 1])))
+        
+        (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
+        if logging:
+            tempWriter.writerow(("{0}".format(split_output[-2]), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
+            
+        if streaming:
+            adcSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]), tempC, tempF))
     
-    sound_writer.writerow(split_output[2 * i], split_output[2 * i + 1])
-
-    temp_writer.writerow(split_output[-2], split_output[-1]
-
+#ftemp.close()
+#fsound.close()
+#print "Done"
 
