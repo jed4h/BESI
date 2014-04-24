@@ -1,0 +1,9 @@
+[Unit]
+Description=periodically checks if wifi BBB is connected to network, and resets wifi if not connected
+
+[Service]
+type=simple
+ExecStart=/usr/bin/wifi-check.sh
+
+[Install]
+WantedBy=multi-user.target

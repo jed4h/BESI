@@ -1,0 +1,9 @@
+[Unit]
+Description=emails BBB IP address on startup
+
+[Service]
+type=simple
+ExecStart=/usr/bin/emailIP.sh
+
+[Install]
+WantedBy=multi-user.target
