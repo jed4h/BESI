@@ -144,27 +144,41 @@ while True:
 	if IS_STREAMING:
 
 		if USE_ACCEL:
+		    # try to connect until successful
+		    while True:
 			# create socket
 			accelSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			# create socket address to send data to base station
 			server_address_accel = (hostIP, BASE_PORT)
 			print >>sys.stderr, 'connecting to %s port %s' % server_address_accel
-			# connect to base station
-			accelSock.connect(server_address_accel)
-			# create a thread to communicate with Shimmer3 and base station
-			accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID, SHIMMER_ID2, SHIMMER_ID3,  IS_STREAMING, IS_LOGGING))
-			# Thread will stop when parent is stopped
-			accelThread.setDaemon(True)
-			
+			try:
+			    # connect to base station
+			    accelSock.connect(server_address_accel)
+			except:
+			    continue
+			else:
+			    # create a thread to communicate with Shimmer3 and base station
+			    accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID, SHIMMER_ID2, SHIMMER_ID3,  IS_STREAMING, IS_LOGGING))
+			    # Thread will stop when parent is stopped
+			    accelThread.setDaemon(True)
+			    break			
+
 		if USE_LIGHT:
+		    while True:
 			lightSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			server_address_light = (hostIP, BASE_PORT + 1)
 			print >>sys.stderr, 'connecting to %s port %s' % server_address_light
-			lightSock.connect(server_address_light)
-			lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock, IS_STREAMING, IS_LOGGING))
-			lightThread.setDaemon(True)
+			try:
+			    lightSock.connect(server_address_light)
+			except:
+			    continue
+			else:
+			    lightThread = threading.Thread(target=lightSense, args=(lightWriter, lightSock, IS_STREAMING, IS_LOGGING))
+			    lightThread.setDaemon(True)
+			    break
 			
 		if USE_ADC:
+		    while True:
 			soundSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			tempSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			doorSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -174,12 +188,17 @@ while True:
 			print >>sys.stderr, 'connecting to %s port %s' % server_address_sound
 			print >>sys.stderr, 'connecting to %s port %s' % server_address_temp
 			print >>sys.stderr, 'connecting to %s port %s' % server_address_door
-			soundSock.connect(server_address_sound)
-			tempSock.connect(server_address_temp)
-			doorSock.connect(server_address_door)
-			# all sensors that use the ADC need to be managed by a single thread
-			ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, doorWriter, doorSock, IS_STREAMING, IS_LOGGING))
-			ADCThread.setDaemon(True)
+			try:
+			    soundSock.connect(server_address_sound)
+			    tempSock.connect(server_address_temp)
+			    doorSock.connect(server_address_door)
+			except:
+			    continue
+			else:
+			    # all sensors that use the ADC need to be managed by a single thread
+			    ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, doorWriter, doorSock, IS_STREAMING, IS_LOGGING))
+			    ADCThread.setDaemon(True)
+			    break
 
 
 	# running the BBB without streaming is not well tested

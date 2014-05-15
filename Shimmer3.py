@@ -55,7 +55,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		accelSock.recv(2048)
 	    except:
 		print "exiting Accel"
-		sys.ecit()
+		sys.exit()
 	    else:
 		noRecvCount = 0
 
