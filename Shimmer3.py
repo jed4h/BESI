@@ -58,7 +58,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    print "wifi connection error"
 	    sys.exit()
 	
-	if noRecvCount == 2:
+	if noRecvCount == 5:
 	    try:
 		accelSock.recv(2048)
 	    except:
@@ -140,8 +140,8 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 #string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
 		try:
                     accelSock.sendall(string + "~~")
-		except:
-		    print "Exiting Accel on Send"
+		except Socket.error as e:
+		    print "Exiting Accel on Send",e
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used
 	    # close the socket if whe still have a reference to it 
@@ -177,15 +177,15 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 	string = struct.pack("HHHHh",0,0,0,0,0)   
     			try:
     			     accelSock.sendall(string + "~~")
-    			except:
-    			    print "wifi connection error"
+    			except Socket.error as e:
+    			    print "wifi connection error",e
     			    sys.exit()
 			break	
 		#while (startStreaming(s) == -1):
 		#	pass
             else:
                 print "Error Connecting to Shimmer"
-		noRecvCount += 10
+		noRecvCount += 5
 		time.sleep(5)
         else:
             #write accel values to a csv file
@@ -205,8 +205,8 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    if True:
 			try:
                     	    accelSock.sendall(string + "~~")
-			except:
-			    print "Exiting acel on Send"
+			except Socket.error as e:
+			    print "Exiting acel on Send",e
 			    sys.exit()
     
         time.sleep(0.5)
