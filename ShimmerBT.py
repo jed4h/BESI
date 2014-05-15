@@ -103,6 +103,12 @@ def sampleAccel(socket):
     #print data
     #print accel_tuple
     
+    # send 0x21 to the Shimmer to let it know that we are still connected
+    try:
+	socket.send("\x21")
+    except:
+	pass
+
     # find the start of a packet
     for byte in accel_tuple:
         start = start + 1
