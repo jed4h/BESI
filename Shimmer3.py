@@ -174,7 +174,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 			    print "Exiting acel on Send"
 			    sys.exit()
     
-        time.sleep(LOOP_DELAY * UPDATE_DELAY)
+        time.sleep(0.5)
         
 	if noRecvCount == 100:
 	    try:

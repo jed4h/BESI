@@ -10,6 +10,7 @@
 import lightblue
 import binascii
 import struct
+import datetime
 import time
 import socket as Socket
 
@@ -89,13 +90,19 @@ def toggleLED(socket):
 # reads 1 secnd of accelerometer data from the Bluetooth
 #returns lists of timestamps and accel. data
 def sampleAccel(socket):
-    maxSize = 4000      #4000 / 256Hz sampling rate * 9 bytes/sample = 1.74 seconds of data
+    #print datetime.datetime.now()
+    maxSize = 4096      #4000 / 256Hz sampling rate * 9 bytes/sample = 1.74 seconds of data
     start = 0
     timestamp = []
     x_accel = []
     y_accel = []
     z_accel = []
     
+    try:
+	socket.send("\x21")
+    except:
+	print "error sending 0x21 to Shimmer"
+
     data = socket.recv(maxSize)
     sizeRecv = len(data)
     #print sizeRecv
@@ -104,35 +111,47 @@ def sampleAccel(socket):
     #print accel_tuple
     
     # send 0x21 to the Shimmer to let it know that we are still connected
-    try:
-	socket.send("\x21")
-    except:
-	pass
+    #try:
+	#socket.send("\x21")
+    #except:
+	#pass
+ 
+    while True:
+	# find the start of a packet
+    	for i  in range(start,len(accel_tuple)):
+       	    start = start + 1
+	    try:
+         	if (accel_tuple[i] == 0) and ((accel_tuple[i+1] == 0) or (accel_tuple[i+1] == 128)):
+            	    break
+	    except:
+		break
 
-    # find the start of a packet
-    for byte in accel_tuple:
-        start = start + 1
-        if byte == 0:
-            break
-        
-    for i in range(sizeRecv-start):
-       # print "i = {0}".format(i)
-        if (i % 9) == 1:
-            timestamp.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start]) 
+	if ((start + 8) > sizeRecv):
+		break
+        #print start
 
-        if (i % 9) == 3:
-            x_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
+	for i in range(8):        
+        #for i in range(sizeRecv-start):
+        # print "i = {0}".format(i)
+            if (i % 9) == 1:
+                timestamp.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start]) 
 
-        if (i % 9) == 5:
-            y_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
+            if (i % 9) == 3:
+               x_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
 
-        if (i % 9) == 7:
-            z_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
+            if (i % 9) == 5:
+                y_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
 
+            if (i % 9) == 7:
+                z_accel.append((accel_tuple[i + start]<< 8) + accel_tuple[i-1 + start])
 
+        start = start + 8
         #for val in range(len(z_accel)):
         #    print("{0} {1} {2} {3}".format(timestamp[val], x_accel[val], y_accel[val], z_accel[val]))
-            
+    #print timestamp[0],x_accel[0],y_accel[0],z_accel[0]        
+    #print timestamp[64],x_accel[64],y_accel[64],z_accel[64]        
+    #print datetime.datetime.now()
+   
     return timestamp, x_accel, y_accel, z_accel
 
 # write one second of data to a csv file
