@@ -18,6 +18,8 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
         
     startTime = datetime.datetime.now()
     
+    lightSock.settimeout(0.0)
+
     while True:
         # calculate time since start
         currTime = datetime.datetime.now()
@@ -40,5 +42,8 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
 	              
 
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
-        
+	try:
+		lightSock.recv(2048)
+	except:
+		sys.exit()        
         
