@@ -21,6 +21,9 @@ import sys
 def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
 
+    # counts seconds to check for ack from basestation
+    noRecvCount = 0
+
     ShimmerIDs = []
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID)
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID2)
@@ -33,18 +36,31 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
         # need to create a new socket afer every disconnect/ failed connect
 	for addr in ShimmerIDs:
         	conn, s, connID = shimmer_connect([addr], PORT)
-        if conn == 1:
-            break
+        	if conn == 1:
+            		break
+	if conn == 1:
+		break
         
 	string = struct.pack("HHHHh",0,0,0,0,0)   
 	#string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(0,0,0,0,0)
     	try:
 	    accelSock.sendall(string + "~~")
-	    accelSock.recv(2048)
+	    #accelSock.recv(2048)
 	except:
 	    print "wifi connection error"
 	    sys.exit()
+	
+	if noRecvCount == 30:
+	    try:
+		accelSock.recv(2048)
+	    except:
+		print "exiting Accel"
+		sys.ecit()
+	    else:
+		noRecvCount = 0
+
 	time.sleep(5)
+	noRecvCount = noRecvCount + 1
 
     # give sensors some time to start up
     time.sleep(1)
@@ -110,6 +126,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		try:
                     accelSock.sendall(string + "~~")
 		except:
+		    print "Exiting Accel on Send"
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
             s.close()
@@ -154,12 +171,17 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 			try:
                     	    accelSock.sendall(string + "~~")
 			except:
+			    print "Exiting acel on Send"
 			    sys.exit()
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
-        try:
+        
+	if noRecvCount == 100:
+	    try:
 		accelSock.recv(2048)
-	except:
-		print "exiting accelThread"
+		noRecvCount = 0
+	    except:
+		print "exiting accel on recv"
 		sys.exit()
 	
+	noRecvCount = noRecvCount + 1

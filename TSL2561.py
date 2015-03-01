@@ -9,6 +9,10 @@ import struct
 import sys
 
 def lightSense(lightWriter, lightSock, streaming=True, logging=True):
+    
+    # conunt seconds until checking for ack form basestation
+    noRecvCount = 0
+
     light_i2c = i2c_light_init(LIGHT_ADDR)
     actualTime = -1
     while(actualTime == -1):
@@ -38,12 +42,19 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
             	lightSock.sendall("{0:015.2f},{1:07.2f},\n".format(currTimeDelta, lightLevel))
             	#lightSock.sendall(packetize(struct.pack("ff", currTimeDelta, lightLevel)))
 	    except:
+		print "Exiting Light on Send"
 		sys.exit()
 	              
 
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
-	try:
+	
+	if noRecvCount == 100:
+	    try:
 		lightSock.recv(2048)
-	except:
+	    except:
+		print "Exiting Light on recv"
 		sys.exit()        
-        
+            else:
+		noRecvCount = 0
+
+	noRecvCount = noRecvCount + 1

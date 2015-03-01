@@ -17,6 +17,9 @@ import sys
 # gets sensor values from the temperature sensor and the microphone, writes the data to a file and sends the data over a socket
 def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock, streaming = True, logging = True):
 
+    # count seconds between checking for ack form basestation
+    noRecvCount = 0
+    
     # NTP server request occasionally fails even if the BBB is connected to the internet. Run NTP check until we get a response    
     actualTime = -1
     while(actualTime == -1):
@@ -62,6 +65,7 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 		   	#doorSock.sendall(struct.pack(""))
 			# doorSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
 		    except:
+			print "Exiting Door ADC"
 			sys.exit()
 		i = i + 1
 
@@ -75,6 +79,7 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
                    	soundSock.sendall(struct.pack("ff", float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])) + "~~")
                     	#soundSock.sendall(packetize(struct.pack("ff",float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
 		    except:
+			print "Exiting Sound ADC"
 			sys.exit()
 
 	    i = i + 1
@@ -93,14 +98,20 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
             	tempSock.sendall("{0:0.4f},{1:03.2f},{2:03.2f},\n".format(float(split_output[-2]) + currTimeDelta, tempC, tempF))
             	#tempSock.sendall(struct.pack("fff", float(split_output[-2]) + currTimeDelta, tempC, tempF))
 	    except:
+		print "Exiting Temp ADC"
 		sys.exit()    
 
-	try:
-		tempSock.recv(2048)
-		soundSock.recv(2048)
-		doorSock.recv(2048)
-	except:
+	if noRecvCount == 20:
+	    try:
+		tempSock.recv(65535)
+		#soundSock.recv(2048)
+		#doorSock.recv(2048)
+		noRecvCount = 0
+	    except:
+		print "ADC Error"
 		sys.exit()
+
+	noRecvCount = noRecvCount + 1
 
 #ftemp.close()
 #fsound.close()
