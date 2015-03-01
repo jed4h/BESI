@@ -10,6 +10,7 @@ from gpio_utils import *
 from ShimmerBT import *
 from Constants import *
 from NTPTime import *
+import subprocess
 import socket
 import time
 import csv
@@ -30,10 +31,11 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
         conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
         if conn == 1:
             break
-           
-	string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
+        
+	string = struct.pack("HHHHh",0,0,0,0,0)   
+	#string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(0,0,0,0,0)
     	try:
-	    accelSock.sendall(string)
+	    accelSock.sendall(string + "~~")
 	except:
 	    sys.exit()
 
@@ -95,10 +97,11 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 # 0, 0, 0, 0 indicates lost connection
                 writeAccel(accelWriter, [0], [0], [0] ,[0])
             if streaming:
+		string = struct.pack("HHHHh",0,0,0,0,0)
 		#string = packetize(struct.pack("HHHH", 0, 0, 0, 0))
-                string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
+                #string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
 		try:
-                    accelSock.sendall(string)
+                    accelSock.sendall(string + "~~")
 		except:
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
@@ -129,14 +132,20 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
             #write accel values to a csv file
             if logging:
                 writeAccel(accelWriter, timestamp, x_accel, y_accel, z_accel)
-            
+		#frssi = open("rssi", "a")
+		rssi_reading = subprocess.check_output(["hcitool","rssi","{}".format(connID)])
+		rssi_int = int(rssi_reading.split(":")[1].rstrip())
+		#frssi.close()            
+
             if streaming:
                 for i in range(len(z_accel)):
+		    string = struct.pack("HHHHh", timestamp[i], x_accel[i], y_accel[i], z_accel[i], rssi_int)
 		    #string = packetize(struct.pack("HHHH", timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
-                    string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i])
-                    if len(string) == 22:
+                    #string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i], rssi_int)
+                    #if len(string) == 22 + 4:
+		    if True:
 			try:
-                    	    accelSock.sendall(string)
+                    	    accelSock.sendall(string + "~~")
 			except:
 			    sys.exit()
     

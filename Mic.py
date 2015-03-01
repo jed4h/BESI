@@ -73,8 +73,12 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 	    i = i + 1
         
 	# send 1 semple from the temperature sensor
-        (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
-        if logging:
+	try:
+            (tempC, tempF) = calc_temp(float(split_output[-1]) * 1000)
+        except:
+	    sys.exit()
+
+	if logging:
             tempWriter.writerow(("{0}".format(float(split_output[-2]) + currTimeDelta), "{0:.2f}".format(tempC), "{0:.2f}".format(tempF)))
             
         if streaming:
