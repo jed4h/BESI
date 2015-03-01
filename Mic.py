@@ -52,9 +52,11 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 		
 		if streaming:
 		    try:
-		    	doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta,
-				     	 float(split_output[2 * i + 1]),float(split_output[2 * i + 3])))
-		   # doorSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
+		    	doorSock.sendall(struct.pack("fff", float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]),float(split_output[2 * i + 3])) + "~~")
+		    	#doorSock.sendall("{0:015.4f},{1:06.2f},{2:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta,
+				     	 #float(split_output[2 * i + 1]),float(split_output[2 * i + 3])))
+		   	#doorSock.sendall(struct.pack(""))
+			# doorSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
 		    except:
 			sys.exit()
 		i = i + 1
@@ -65,7 +67,8 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
                 
         	if streaming:
 		    try:
-                    	soundSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
+                     	#soundSock.sendall("{0:015.4f},{1:06.2f},\n".format(float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])))
+                   	soundSock.sendall(struct.pack("ff", float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1])) + "~~")
                     	#soundSock.sendall(packetize(struct.pack("ff",float(split_output[2 * i]) + currTimeDelta, float(split_output[2 * i + 1]))))
 		    except:
 			sys.exit()
