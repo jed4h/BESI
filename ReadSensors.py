@@ -91,6 +91,7 @@ while True:
 			synchSock.connect(server_address_synch)
 		except:
 			print "connection to base station timed out"
+			time.sleep(5)
 			continue
 			
 		synchSock.settimeout(None)
