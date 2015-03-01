@@ -50,7 +50,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    print "wifi connection error"
 	    sys.exit()
 	
-	if noRecvCount == 30:
+	if noRecvCount == 5:
 	    try:
 		accelSock.recv(2048)
 	    except:
