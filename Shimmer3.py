@@ -138,8 +138,8 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		#frssi.close()            
 
             if streaming:
-                for i in range(len(z_accel)):
-		    string = struct.pack("HHHHh", timestamp[i], x_accel[i], y_accel[i], z_accel[i], rssi_int)
+                for i in range(len(z_accel)/2):
+		    string = struct.pack("HHHHh", timestamp[2*i], x_accel[2*i], y_accel[2*i], z_accel[2*i], rssi_int)
 		    #string = packetize(struct.pack("HHHH", timestamp[i], x_accel[i], y_accel[i], z_accel[i]))
                     #string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(timestamp[i], x_accel[i], y_accel[i], z_accel[i], rssi_int)
                     #if len(string) == 22 + 4:
