@@ -13,16 +13,23 @@ import struct
 import datetime
 import time
 import socket as Socket
+import subprocess
 
 # accelerometer packet format in bytes is:
 # 0  |  timestamp_low  |  timestamp_high  |  x_accel_low  |  x_accel_high ...
 
 
+# use hcitool to scan for Bluetooth devices
+# lightblue.finddevices oes not show Shimmers
+def BTScan():
+    proc = subprocess.Popen(["hcitool","scan"], stdout=subprocess.PIPE)
+    return proc.communicate()[0].split()
+
 
 #connects to a shimmer with the given address
 def shimmer_connect(addr, port):
     # scanning takes several seconds, so just try to connect without scanning
-    deviceFound = 1
+    deviceFound = 0
     print "attempting to connect"
     # HDE Bluetooth dongle does not find shimmer, but can connect
     #devices = lightblue.finddevices()
@@ -30,29 +37,35 @@ def shimmer_connect(addr, port):
    #for device in devices:
     #        if device[0] == addr:
      #           deviceFound = 1
+    discDevices = BTScan()
     
+    for device in addr:
+	if device in discDevices:
+	    address = device
+	    deviceFound = 1
+	    break
         
     if deviceFound == 1:   
         #attemp to connect to shimmer
-        for address in addr:
-            socket = lightblue.socket()
-            try:
-            	socket.connect((address, port))
-	    	print "successfully Connected to {}".format(address)
-            	toggleLED(socket)
-            	time.sleep(1)
-            	toggleLED(socket)
-            	socket.settimeout(0)    # make receive nonblocking
+        #for address in addr:
+        socket = lightblue.socket()
+        try:
+            socket.connect((address, port))
+	    print "successfully Connected to {}".format(address)
+            toggleLED(socket)
+            time.sleep(1)
+            toggleLED(socket)
+            socket.settimeout(0)    # make receive nonblocking
             	#print "successfully connected"
-            	return 1, socket, address
-            except Socket.error as e:
-            	print "failed to connect",e
+            return 1, socket, address
+        except Socket.error as e:
+            print "failed to connect",e
             
         return 0, socket, None   
             
     else:
         print "failed to find device"
-        return 0
+        return 0, None, None
         
         
         

@@ -48,7 +48,7 @@ def lightSense(lightWriter, lightSock, streaming=True, logging=True):
 
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
 	
-	if noRecvCount == 100:
+	if noRecvCount == 20:
 	    try:
 		lightSock.recv(2048)
 	    except:

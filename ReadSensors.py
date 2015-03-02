@@ -122,7 +122,7 @@ while True:
 		SHIMMER_ID = splitData[3]
 		SHIMMER_ID2 = splitData[4]
 		SHIMMER_ID3 = splitData[5]
-
+		startDateTime = splitData[6]
 
 		synchSock.close()
 
@@ -130,7 +130,7 @@ while True:
 	flight = open("light", "w")
 	faccel = open("accel", "w")
 	fsound = open("sound", "w")
-	ferror = open("error", "w")
+	ferror = open("error", "a")
 	fdoor = open("door", "w")
 
 	accelWriter = csv.writer(faccel)
@@ -159,7 +159,7 @@ while True:
 			continue
 		    else:
 			# create a thread to communicate with Shimmer3 and base station
-			accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID, SHIMMER_ID2, SHIMMER_ID3,  IS_STREAMING, IS_LOGGING))
+			accelThread = threading.Thread(target=shimmerSense, args=(accelWriter,accelSock, ferror, SHIMMER_ID, SHIMMER_ID2, SHIMMER_ID3,  IS_STREAMING, IS_LOGGING, startDateTime))
 			# Thread will stop when parent is stopped
 			accelThread.setDaemon(True)
 			#break			

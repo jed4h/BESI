@@ -18,7 +18,7 @@ import struct
 import sys
 
 
-def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True):
+def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True, startDateTime = "0"):
     streamingError = 0  # set to 1 if we lose connecting while streaming
 
     # counts seconds to check for ack from basestation
@@ -31,16 +31,24 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 
     accelSock.settimeout(0.0)
 
+    ferror.write(startDateTime + "\n")
+
     # attempt to connect until successful
     while True:
+	conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
         # need to create a new socket afer every disconnect/ failed connect
-	for addr in ShimmerIDs:
-        	conn, s, connID = shimmer_connect([addr], PORT)
-        	if conn == 1:
-            		break
+	#for addr in ShimmerIDs:
+        #	conn, s, connID = shimmer_connect([addr], PORT)
+        #	if conn == 1:
+         #   		break
+	#	else:
+	#	    time.sleep(5)		    
+	#time.sleep(5)
 	if conn == 1:
 		break
-        
+	else:
+	    time.sleep(5)
+
 	string = struct.pack("HHHHh",0,0,0,0,0)   
 	#string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(0,0,0,0,0)
     	try:
@@ -50,7 +58,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    print "wifi connection error"
 	    sys.exit()
 	
-	if noRecvCount == 5:
+	if noRecvCount == 2:
 	    try:
 		accelSock.recv(2048)
 	    except:
@@ -59,7 +67,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    else:
 		noRecvCount = 0
 
-	time.sleep(5)
+	#time.sleep(5)
 	noRecvCount = noRecvCount + 1
 
     # give sensors some time to start up
@@ -79,14 +87,14 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     	actualTime = getDateTime()
     if logging:
         accelWriter.writerow(("Accelerometer", actualTime))
- 
-    ferror.write("Connection Established to {}. Time: {}\n".format(connID, actualTime))
+
+    startTime = datetime.datetime.now() 
+    ferror.write("Connection Established to {}. Time: {}\n".format(connID, datetime.datetime.now()-startTime))
            
     #if streaming:
     #    accelSock.sendall("Accelerometer" + actualTime + "\n")
 
     # get start time of the BBB clock to calculate time deltas        
-    startTime = datetime.datetime.now()
     time.sleep(1)
     print "Sending Start Streaming Command"
     # try sending start streaming command 10 times
@@ -112,7 +120,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    while(actualTime == -1):
 			actualTime = getDateTime()
 		    # log every disconnect event in a file
-		    ferror.write("Connection Lost from {}. Time: {}\n".format(connID, actualTime))
+		    ferror.write("Connection Lost from {}. Time: {}\n".format(connID, datetime.datetime.now()-startTime))
 
             streamingError = 1
             print "error sampling accelerometers"
@@ -128,18 +136,30 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		except:
 		    print "Exiting Accel on Send"
 		    sys.exit()
-	    # create a new socket object because the old one cannot be used 
-            s.close()
+	    # create a new socket object because the old one cannot be used
+	    # close the socket if whe still have a reference to it 
+            try:
+		s.close()
+	    except:
+		pass
+
             #attempt to reconnect
             conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
-            if (conn == 1):
+            #for addr in ShimmerIDs:
+	    #	conn,s,connID = shimmer_connect([addr], PORT)
+	    #	if conn == 1:
+	#	    break
+	#	else:
+	#	    time.sleep(5)
+
+	    if (conn == 1):
 		print "Connection Est. to {}".format(connID)
                 time.sleep(1)
 		actualTime = -1
 		while(actualTime == -1):
                 	actualTime = getDateTime()
 		# log reconnect events to a file
-    		ferror.write("Connection Re-established to {}. Time: {}\n".format(connID, actualTime))
+    		ferror.write("Connection Re-established to {}. Time: {}\n".format(connID, datetime.datetime.now()-startTime))
 
                 if logging:
                     accelWriter.writerow(("Accelerometer", actualTime))
@@ -152,6 +172,8 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		#	pass
             else:
                 print "Error Connecting to Shimmer"
+		noRecvCount += 10
+		time.sleep(5)
         else:
             #write accel values to a csv file
             if logging:
@@ -176,7 +198,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     
         time.sleep(0.5)
         
-	if noRecvCount == 100:
+	if noRecvCount >= 30:
 	    try:
 		accelSock.recv(2048)
 		noRecvCount = 0
