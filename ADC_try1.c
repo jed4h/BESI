@@ -22,6 +22,8 @@ Usage: ./ADC <Start Time>
 #define PIR_OFFSET 0
 #define TIMESTEP (float)SAMPLE_WINDOW/10000
 /* ----------------------------------------------------------- */
+float highPassFilter(float last_output, float input, float last_input);
+
 int main(int argc, const char* argv[])
 {
 	unsigned int mic_sample,pir_sample,temp_sample;
@@ -33,7 +35,7 @@ int main(int argc, const char* argv[])
 	FILE *temp_file;
 	struct timeval t_start, t_end;
  	float mTime =0;
- 	float mic_avg, pir_avg;
+ 	float mic_avg, pir_avg, mic_out, last_mic_sample, last_mic_output, filter_out;
 
 	/* BBBIOlib init*/
 	iolib_init();
@@ -79,10 +81,14 @@ int main(int argc, const char* argv[])
 	BBBIO_ADCTSC_work(MIC_SAMPLE_SIZE);
 
 	i = 0; k = 0;
-	mic_avg = 0; pir_avg = 0;
+	mic_avg = 0; pir_avg = 0; mic_out = 0; last_mic_sample = 0; last_mic_output = 0;
 	for(j = 0 ; j < MIC_SAMPLE_SIZE ; j++) {
 		mic_sample = buffer_AIN_1[j];
-		mic_avg += fabs(MIC_OFFSET - ((float)mic_sample / 4095.0f) * 1.8f);
+		mic_out = (OFFSET - ((float)mic_sample / 4095.0f) * 1.8f);
+		filter_out = highPassFilter(last_mic_output, mic_out, last_mic_sample); 
+		mic_avg += fabs(filter_out);
+		last_mic_sample = mic_out;
+		last_mic_output = filter_out;
 		if (((j+1) % 10) == 0){
 			pir_sample = buffer_AIN_2[j];
 			pir_avg += fabs(PIR_OFFSET - ((float)pir_sample / 4095.0f) * 1.8f);
@@ -128,3 +134,10 @@ int main(int argc, const char* argv[])
 	return 0;
 }
 
+//High pass filter with cutoff frequency of approx. 0.03 * pi rad/sec (165 Hz for fs = 10 kHz)
+float highPassFilter(float last_output, float input, float last_input){
+	float output;
+	output = 0.9 * last_output + input - last_input;
+	return output;
+	
+}
