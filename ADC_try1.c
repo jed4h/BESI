@@ -84,7 +84,7 @@ int main(int argc, const char* argv[])
 	mic_avg = 0; pir_avg = 0; mic_out = 0; last_mic_sample = 0; last_mic_output = 0;
 	for(j = 0 ; j < MIC_SAMPLE_SIZE ; j++) {
 		mic_sample = buffer_AIN_1[j];
-		mic_out = (OFFSET - ((float)mic_sample / 4095.0f) * 1.8f);
+		mic_out = (MIC_OFFSET - ((float)mic_sample / 4095.0f) * 1.8f);
 		filter_out = highPassFilter(last_mic_output, mic_out, last_mic_sample); 
 		mic_avg += fabs(filter_out);
 		last_mic_sample = mic_out;
