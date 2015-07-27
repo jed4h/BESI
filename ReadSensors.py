@@ -121,14 +121,18 @@ if IS_STREAMING:
     if USE_ADC:
         soundSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tempSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        doorSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address_sound = (hostIP, BASE_PORT + 2)
         server_address_temp = (hostIP, BASE_PORT + 3)
+        server_address_door = (hostIP, BASE_PORT + 4)
         print >>sys.stderr, 'connecting to %s port %s' % server_address_sound
         print >>sys.stderr, 'connecting to %s port %s' % server_address_temp
+        print >>sys.stderr, 'connecting to %s port %s' % server_address_door
         soundSock.connect(server_address_sound)
         tempSock.connect(server_address_temp)
+        doorSock.connect(server_address_door)
         # all sensors that use the ADC need to be managed by a single thread
-        ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, IS_STREAMING, IS_LOGGING))
+        ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, soundSock, tempSock, doorWriter, doorSock, IS_STREAMING, IS_LOGGING))
         ADCThread.setDaemon(True)
 
 
@@ -141,7 +145,7 @@ else:
         lightThread = threading.Thread(target=lightSense, args=(lightWriter, None, IS_STREAMING, IS_LOGGING))
 	lightThread.setDaemon(True)
     if USE_ADC:
-        ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, None, None, IS_STREAMING, IS_LOGGING))
+        ADCThread = threading.Thread(target=soundSense, args = (tempWriter, soundWriter, None, None, doorWriter, None, IS_STREAMING, IS_LOGGING))
 
 
 
@@ -165,6 +169,7 @@ finally:
     flight.close()
     faccel.close()
     fsound.close()
+    fdoor.close()
     if IS_STREAMING:
 	if USE_ACCEL:
             accelSock.close()
