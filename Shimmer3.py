@@ -20,12 +20,14 @@ import sys
 def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
     
-    
+    ShimmerIDs = []
+    ShimmerIDs.append(SHIMMER_BASE + ShimmerID)
+    ShimmerIDs.append(SHIMMER_BASE + ShimmerID2)
+    ShimmerIDs.append(SHIMMER_BASE + ShimmerID3)
     # attempt to connect until successful
     while True:
         # need to create a new socket afer every disconnect/ failed connect
-        s = lightblue.socket()
-        conn = shimmer_connect(s, SHIMMER_BASE + ShimmerID, PORT)
+        conn, s = shimmer_connect(ShimmerIDs, PORT)
         if conn == 1:
             break
     
@@ -90,9 +92,9 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
             s.close()
-            s = lightblue.socket()
             #attempt to reconnect
-            if (shimmer_connect(s, SHIMMER_BASE + ShimmerID, PORT) == 1):
+            conn, s = shimmer_connect(ShimmerIDs, PORT)
+            if (conn == 1):
 		print "Connection Est."
                 time.sleep(1)
 		actualTime = -1
