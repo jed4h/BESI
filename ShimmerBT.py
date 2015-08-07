@@ -19,7 +19,7 @@ import socket as Socket
 
 
 #connects to a shimmer with the given address
-def shimmer_connect(socket, addr1, addr2, addr3, port):
+def shimmer_connect(addr, port):
     # scanning takes several seconds, so just try to connect without scanning
     deviceFound = 1
     print "attempting to connect"
@@ -30,11 +30,11 @@ def shimmer_connect(socket, addr1, addr2, addr3, port):
     #        if device[0] == addr:
      #           deviceFound = 1
     
-        
+    socket = lightblue.socket()    
     if deviceFound == 1:   
         #attemp to connect to shimmer    
         try:
-            socket.connect((addr1, port))
+            socket.connect((addr[0], port))
 	    print "successfully Connected"
             toggleLED(socket)
             time.sleep(1)
@@ -44,33 +44,8 @@ def shimmer_connect(socket, addr1, addr2, addr3, port):
             return 1
         except Socket.error as e:
             print "failed to connect",e
+            return 0
             
-        try:
-            socket.connect((addr2, port))
-	    print "successfully Connected"
-            toggleLED(socket)
-            time.sleep(1)
-            toggleLED(socket)
-            socket.settimeout(0)    # make receive nonblocking
-            #print "successfully connected"
-            return 1
-        except Socket.error as e:
-            print "failed to connect",e
-            
-        try:
-            socket.connect((addr3, port))
-	    print "successfully Connected"
-            toggleLED(socket)
-            time.sleep(1)
-            toggleLED(socket)
-            socket.settimeout(0)    # make receive nonblocking
-            #print "successfully connected"
-            return 1
-        except Socket.error as e:
-            print "failed to connect",e
-            
-        return 0
-        
     else:
         print "failed to find device"
         return 0
