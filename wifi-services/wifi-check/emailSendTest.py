@@ -33,7 +33,7 @@ mailserver.ehlo()
 mailserver.starttls()
 # re-identify ourselves as an encrypted connection
 mailserver.ehlo()
-mailserver.login('jduganuva@gmail.com', 'mRv4HCcza9UqgZRL')
+mailserver.login('jduganuva@gmail.com', 'mRv4HCcza9UqgZR')
 
 mailserver.sendmail('jduganuva@gmail.com','jduganuva@gmail.com',msg.as_string())
 
