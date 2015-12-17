@@ -7,55 +7,50 @@
 close all
 
 %Initialize the recording hardware
-recorder = dsp.AudioRecorder('SampleRate',44100,'SamplesPerFrame',1024);
+windowSize = 16384;
+recorder = dsp.AudioRecorder('SampleRate',8000,'SamplesPerFrame',...
+    windowSize);
 Fs = recorder.SampleRate;
 currentT = 0:1/100:500/100-1/100;
 prevT = 0;
 t = 0:1/100:10000/100-1/100;
 
 %Make the filters that are needed for the band pass filtering
-[b0,a0] = butter(2,4000/Fs,'low');
-[b1,a1] = butter(2,60/Fs,'high');
+% Bandpass 60-4000 Hz
+d = fdesign.bandpass('N,F3dB1,F3dB2',2,60,4000,Fs);
+bandpass = design(d,'butter');
+%fvtool(Hd)
 
-figure(1)
-xlim([0 100])
-hold on
 
-tic
-Tstop = 100;
-count = 0;
-while (toc < Tstop)
-    audioIn = step(recorder);
-    envIn   = envelope(audioIn);
+while(1)
+    figure(1)
+    xlim([0 2102400])
+    hold on
     
+    figure(2)
+    xlim([0 2102400])
+    hold on
     
-    
-    
-%     audioenv = getaudiodata(recorder);
-%     %audioenv = filter(b0,a0,filter(b1,a1,audioenv));
-%     audioenv = envelope(audioenv, 2048, 'peak');  
-%     %This didn't quite make sense in this location, because the envelope, 
-%     % almost by definition, has a different set of frequencies associated
-%     % with it. However, the alternative messes up the data, i.e. filtering
-%     % before the envelope is found messes it up.........
-%     audioenv = filter(b0,a0,filter(b1,a1,audioenv));
-%     audioenv = decimate(audioenv, 10);
-%     audioenv = decimate(audioenv, 8);
-%     envteagr = teager(audioenv);
-%     envteagr(1:30) = 0;
-%     envteagr = winAvg(envteagr, 50);
-%     %envteagr = TimeIdentifier(envteagr, 0.2e-07);
-%     teagT = currentT(2:length(currentT)-1);
-%     plot(teagT, envteagr);
-%     currentT = (prevT+500)/100:1/100:(prevT+1000-1)/100;
-%     prevT = prevT + 5*Fs/80;
-%     if (prevT >= 10000)
-%         prevT = 0;
-%         currentT = 0:1/100:500/100-1/100;
-%         close all
-%         figure(1)
-%         xlim([0 100])
-%         %ylim([-0.0000001 0.0000001])
-%         hold on
-%     end
+    tic
+
+    Tstop = 300;
+    count = 0;
+
+    while (toc < Tstop)
+        audioIn = step(recorder);
+        audioIn = filter(bandpass,audioIn);
+        envIn  = envelope(audioIn);
+        %envIn  = envelope(envIn);
+        tTgr = count*windowSize+2:1:(count+1)*windowSize-1;
+        tEnv = count*windowSize+1:1:(count+1)*windowSize;
+        tgrEnv = teager(envIn(:,1));
+        wnAvg  = winAvg(tgrEnv, 128);
+        figure(1)
+        plot(tTgr',wnAvg, 'r');
+        figure(2)
+        plot(tEnv', envIn(:,1), 'b')
+        drawnow
+        count = count + 1;
+    end
+    close all
 end
