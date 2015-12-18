@@ -7,7 +7,7 @@
 close all
 
 %Initialize the recording hardware
-windowSize = 4096;
+windowSize = 1024*4;
 recorder = dsp.AudioRecorder('SampleRate',8000,'SamplesPerFrame',...
     windowSize);
 Fs = recorder.SampleRate;
@@ -21,6 +21,12 @@ endOfBuffer = 50;
 buffer = zeros(endOfBuffer,1);
 buffcount = 1;
 runavg = 0;
+prevRunAvg = 0;
+
+%Need another buffer to store several runavg values in order to figure out
+%when to reset the DerivativeCount if there is an ongoing conversation
+avgBuffer = zeros(15,1);
+avgCount = 1;
 
 %If the person starts to get agitated, then likely the derivative of the
 %average energy (graphed in blue in Fig 3) is going to be positive for a
@@ -35,11 +41,30 @@ DerivativeCount = 0;
 %Variable indicating current state of person
 currentlyAgitated = 0;
 
+Threshold = 0.005;
+
 %Make the filters that are needed for the band pass filtering
 % Bandpass 60-4000 Hz
 d = fdesign.bandpass('N,F3dB1,F3dB2',2,60,4000,Fs);
 bandpass = design(d,'butter');
 %fvtool(Hd)
+
+figure(4)
+subplot(2,1,1)
+xlim([0 700])
+title('Average Teager Energy Over Time')
+xlabel('Time')
+ylabel('Teager Energy')
+hold on
+
+
+subplot(2,1,2)
+xlim([0 700])
+ylim([-0.1 1.1])
+xlabel('Time')
+ylabel('Agitation State')
+title('Agitation State Corresponding to Time')
+hold on
 
 
 while(1)
@@ -47,13 +72,7 @@ while(1)
 %     xlim([0 windowSize*500])
 %     hold on
 %     
-    figure(2)
-    xlim([0 100])
-    hold on
-    
-    figure(3)
-    xlim([0 100])
-    hold on
+
 
     tic
 
@@ -73,35 +92,53 @@ while(1)
         runsum = runsum - buffer(buffcount);
         buffer(buffcount) = mean(tgrEnv);
         runsum = runsum + buffer(buffcount);
+        prevRunAvg = runavg;
         runavg = runsum / endOfBuffer;
-        
-        if buffcount == 1
-           if buffer(buffcount) > buffer(endOfBuffer)
-              DerivativeCount = DerivativeCount + 1; 
-           elseif buffer(buffcount) < buffer(endOfBuffer)
-              DerivativeCount = DerivativeCount - 1; 
-           end
-        else 
-           if buffer(buffcount) > buffer(buffcount - 1) 
-               DerivativeCount = DerivativeCount + 1; 
-           elseif buffer(buffcount) < buffer(buffcount - 1)
-              DerivativeCount = DerivativeCount - 1; 
-           end
+        avgBuffer(avgCount) = runavg;
+        avgCount = avgCount + 1;
+        if avgCount > 15
+            avgCount = 1;
         end
         
-        if DerivativeCount > 20 && runavg > 0.02
-           currentlyAgitated = 1; 
+        
+        
+        if runavg > Threshold
+%             if runavg > prevRunAvg
+%                 DerivativeCount = DerivativeCount + 1; 
+%             end
+            if (runavg-prevRunAvg) > 0.00005
+                DerivativeCount = DerivativeCount + 1;
+            end
+            
+            if DerivativeCount > 15
+                currentlyAgitated = 1; 
+            else
+%                 DerivativeCount = 0;
+                currentlyAgitated = 0;
+            end
         end
+        
+        if abs(runavg-prevRunAvg) <= 0.00005 || runavg < prevRunAvg
+            DerivativeCount = DerivativeCount - 1; 
+        end
+        
+        if DerivativeCount < 0 || runavg < Threshold
+           DerivativeCount = 0; 
+        end
+            
+
 %         wnAvg  = winAvg(tgrEnv, 128);
         
-        figure(3)
+        subplot(2,1,1)
         stem(count, runavg, 'b');
         stem(count, buffer(buffcount), 'r:');
+        legend('50 Averaged Average Points', '4096 Averaged Samples')
 %         figure(1)
 %         plot(tTgr', wnAvg , 'r');
-        figure(2)
+        subplot(2,1,2)
         stem(count, currentlyAgitated, 'g')
         drawnow
+        
         
         if buffcount >= 50
             buffcount = 1;
@@ -109,6 +146,25 @@ while(1)
             buffcount = buffcount + 1;
         end
         count = count + 1;
+        
+        (runavg-prevRunAvg)
+        DerivativeCount
     end
-    close all
+    
+    clf
+    
+    subplot(2,1,1)
+    xlim([0 700])
+    title('Average Teager Energy Over Time')
+    xlabel('Time')
+    ylabel('Teager Energy')
+    hold on
+
+    subplot(2,1,2)
+    xlim([0 700])
+    ylim([-0.1 1.1])
+    xlabel('Time')
+    ylabel('Agitation State')
+    title('Agitation State Corresponding to Time')
+    hold on
 end
