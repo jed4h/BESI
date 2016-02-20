@@ -30,6 +30,10 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
         startTime = datetime.datetime.now()
     
     while True:
+	soundSock.settimeout(0.0)
+	tempSock.settimeout(0.0)
+	doorSock.settimeout(0.0)
+	
 	# calculate the time since the start of the data collection
         currTime = datetime.datetime.now()
         currTimeDelta = (currTime - startTime).days * 86400 + (currTime - startTime).seconds + (currTime - startTime).microseconds / 1000000.0
@@ -91,6 +95,12 @@ def soundSense(tempWriter, soundWriter,soundSock, tempSock, doorWriter, doorSock
 	    except:
 		sys.exit()    
 
+	try:
+		tempSock.recv(2048)
+		soundSock.recv(2048)
+		doorSock.recv(2048)
+	except:
+		sys.exit()
 
 #ftemp.close()
 #fsound.close()

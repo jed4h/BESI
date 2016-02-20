@@ -24,11 +24,15 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
     ShimmerIDs = []
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID)
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID2)
-    ShimmerIDs.append(SHIMMER_BASE + ShimmerID3)
+    #ShimmerIDs.append(SHIMMER_BASE + ShimmerID3)
+
+    accelSock.settimeout(0.0)
+
     # attempt to connect until successful
     while True:
         # need to create a new socket afer every disconnect/ failed connect
-        conn, s, connID = shimmer_connect(ShimmerIDs, PORT)
+	for addr in ShimmerIDs:
+        	conn, s, connID = shimmer_connect([addr], PORT)
         if conn == 1:
             break
         
@@ -36,10 +40,11 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	#string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(0,0,0,0,0)
     	try:
 	    accelSock.sendall(string + "~~")
-	    #print accelSock.recv(1024)
+	    accelSock.recv(2048)
 	except:
 	    print "wifi connection error"
 	    sys.exit()
+	time.sleep(5)
 
     # give sensors some time to start up
     time.sleep(1)
@@ -104,7 +109,6 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 #string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
 		try:
                     accelSock.sendall(string + "~~")
-		    #print accelSock.recv(1024)
 		except:
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
@@ -149,9 +153,13 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    if True:
 			try:
                     	    accelSock.sendall(string + "~~")
-			    #print accelSock.recv(1024)
 			except:
 			    sys.exit()
     
         time.sleep(LOOP_DELAY * UPDATE_DELAY)
-        
+        try:
+		accelSock.recv(2048)
+	except:
+		print "exiting accelThread"
+		sys.exit()
+	
