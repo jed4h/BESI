@@ -20,7 +20,7 @@ import sys
 
 def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerID3, streaming = True, logging = True):
     streamingError = 0  # set to 1 if we lose connecting while streaming
-    
+
     ShimmerIDs = []
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID)
     ShimmerIDs.append(SHIMMER_BASE + ShimmerID2)
@@ -36,7 +36,9 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	#string = "{0:05d},{1:04d},{2:04d},{3:04d},{4:03d},\n".format(0,0,0,0,0)
     	try:
 	    accelSock.sendall(string + "~~")
+	    #print accelSock.recv(1024)
 	except:
+	    print "wifi connection error"
 	    sys.exit()
 
     # give sensors some time to start up
@@ -102,6 +104,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
                 #string = "{0:05d},{1:04d},{2:04d},{3:04d},\n".format(0,0,0,0)
 		try:
                     accelSock.sendall(string + "~~")
+		    #print accelSock.recv(1024)
 		except:
 		    sys.exit()
 	    # create a new socket object because the old one cannot be used 
@@ -146,6 +149,7 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		    if True:
 			try:
                     	    accelSock.sendall(string + "~~")
+			    #print accelSock.recv(1024)
 			except:
 			    sys.exit()
     
