@@ -104,7 +104,14 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 	    streamingError = 0
 	    break
     #while (startStreaming(s) == -1):
-    #	pass		
+    #	pass	
+    
+    string = struct.pack("HHHHh",0,0,0,0,0)   
+    try:
+    	accelSock.sendall(string + "~~")
+    except:
+    	print "wifi connection error"
+    	sys.exit()
     
     while True:
 	# if an exception is raised receiving data or connection is lost (streamingError == 1) try to reconnect
@@ -167,6 +174,12 @@ def shimmerSense(accelWriter, accelSock, ferror, ShimmerID, ShimmerID2, ShimmerI
 		for attempt in range(10):
 		    if (startStreaming(s) != -1):
                 	streamingError = 0
+                	string = struct.pack("HHHHh",0,0,0,0,0)   
+    			try:
+    			     accelSock.sendall(string + "~~")
+    			except:
+    			    print "wifi connection error"
+    			    sys.exit()
 			break	
 		#while (startStreaming(s) == -1):
 		#	pass
